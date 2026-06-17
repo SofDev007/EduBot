@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% set active_page = 'questions' %}
+
+{% block title %}Questions — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+.page-actions { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+
+.stats-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.stat-pill { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; font-size: 13px; }
+.stat-pill .n { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 15px; }
+.stat-pill .n.easy  { color: var(--emerald); }
+.stat-pill .n.hard  { color: var(--red); }
+.stat-pill .n.total { color: var(--cyan); }
+
+.subj-banner {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--cyan);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+.subj-banner strong { color: var(--cyan); }
+
+.q-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; transition: all 0.2s; }
+.q-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
+.q-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px; }
+.q-topic {
+  font-size: 11px;
+  background: rgba(255,107,53,0.08);
+  color: var(--cyan);
+  border: 1px solid rgba(255,107,53,0.15);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.diff-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+.diff-badge.easy { background: rgba(52,211,153,0.1); color: var(--emerald); border: 1px solid rgba(52,211,153,0.2); }
+.diff-badge.hard { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.q-text { font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 12px; line-height: 1.55; }
+.opts { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.opt { padding: 7px 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; font-size: 12px; color: var(--muted2); }
+.opt.correct { background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.25); color: var(--emerald); font-weight: 500; }
+.ans-label { font-size: 11px; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--border); }
+.ans-label span { color: var(--emerald); font-weight: 600; }
+
+.q-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 7px; flex: 1; text-align: center; }
+.btn-delete { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.btn-delete:hover { background: rgba(248,113,113,0.2); border-color: var(--red); }
+.delete-all-btn { margin-bottom: 16px; background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.delete-all-btn:hover { background: rgba(248,113,113,0.15); border-color: var(--red); }
+
+/* Add-question modal form */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted2); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+.form-input:focus { border-color: var(--cyan); }
+.form-textarea { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; font-family: inherit; min-height: 80px; resize: vertical; outline: none; }
+.form-textarea:focus { border-color: var(--cyan); }
+.option-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.correct-checkbox { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted2); }
+.correct-checkbox input { cursor: pointer; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions button { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-submit { background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #0a0a0a; }
+.btn-cancel { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <h2>Questions</h2>
+    <p>{{ questions|length }} questions in database</p>
+  </div>
+  {% if subject %}
+  <a href="/admin/upload?subject_id={{ subject.id }}" class="btn btn-p">➕ Generate More</a>
+  {% endif %}
+</div>
+
+{% if subject %}
+<div class="subj-banner">
+  <strong>{{ subject.name }}</strong>{% if subject.description %} — {{ subject.description }}{% endif %}
+</div>
+{% endif %}
+
+{% if questions %}
+<div class="stats-row">
+  <div class="stat-pill"><span class="n total">{{ questions|length }}</span><span>Total</span></div>
+  <div class="stat-pill"><span class="n easy">{{ questions|selectattr('difficulty','equalto','easy')|list|length }}</span><span>Easy</span></div>
+  <div class="stat-pill"><span class="n hard">{{ questions|selectattr('difficulty','equalto','hard')|list|length }}</span><span>Hard</span></div>
+</div>
+<div class="q-grid">
+  {% for q in questions %}
+  <div class="q-card">
+    <div class="q-head">
+      <span class="q-topic">{{ q.topic }}</span>
+      <span class="diff-badge {{ q.difficulty }}">{{ q.difficulty }}</span>
+    </div>
+    <div class="q-text">{{ q.question_text }}</div>
+    <div class="opts">
+      <div class="opt {% if q.correct_option == 'A' %}correct{% endif %}">A: {{ q.option_a }}</div>
+      <div class="opt {% if q.correct_option == 'B' %}correct{% endif %}">B: {{ q.option_b }}</div>
+      <div class="opt {% if q.correct_option == 'C' %}correct{% endif %}">C: {{ q.option_c }}</div>
+      <div class="opt {% if q.correct_option == 'D' %}correct{% endif %}">D: {{ q.option_d }}</div>
+    </div>
+    <div class="ans-label">Correct Answer: <span>{{ q.correct_option }}</span></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="ei">📭</div>
+  <p>No questions yet. Upload a syllabus to generate some!</p>
+  <a href="/admin/upload" class="btn btn-p" style="display:inline-flex;margin-top:16px;">📤 Upload Syllabus</a>
+</div>
+{% endif %}
+{% endblock %}

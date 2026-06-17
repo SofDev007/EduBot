@@ -1,0 +1,32 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy: push to GitHub, then in Render click "New +" → "Blueprint" and pick this repo.
+services:
+  - type: web
+    name: edubot
+    runtime: python
+    plan: free
+    # Single worker on purpose: question generation uses an in-process background
+    # thread + a global progress dict, which would not be shared across workers.
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.12"
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: DB_TYPE
+        value: sqlite
+      - key: TZ_NAME
+        value: Asia/Kolkata
+      # Auto-generated strong session key (you don't need to set this yourself)
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      # Secrets: enter these in the Render dashboard (sync:false = not stored in git)
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false

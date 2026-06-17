@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduBot — Sign In</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--surface:#171717;--surface2:#222222;--border:#333333;--border2:#444444;--cyan:#ff6b35;--cyan2:#ff8c5a;--violet:#ff8c5a;--violet2:#ffa270;--emerald:#22c55e;--red:#ef4444;--text:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{font-family:'Inter', sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:100vh;overflow:hidden;}
+
+/* LEFT */
+.left{position:relative;display:flex;flex-direction:column;justify-content:center;padding:60px;overflow:hidden;background:linear-gradient(145deg,#0a0a0a,#171717);}
+.left::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(255,107,53,0.12),transparent 70%);top:-100px;left:-100px;border-radius:50%;animation:gb1 8s ease-in-out infinite alternate;}
+@keyframes gb1{to{transform:translate(30px,20px) scale(1.1);}}
+@keyframes gb2{to{transform:translate(-20px,-30px) scale(1.15);}}
+.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.particle{position:absolute;border-radius:50%;will-change:transform,opacity;}
+.void-circle{position:fixed;pointer-events:none;border-radius:50%;z-index:2;transform:translate(-50%,-50%);transition:width 0.25s ease,height 0.25s ease,opacity 0.3s ease;opacity:0;border:1.5px solid rgba(255,140,90,0.3);box-shadow:0 0 40px rgba(255,140,90,0.1),inset 0 0 40px rgba(6,8,16,0.7);backdrop-filter:blur(1px);}
+.lc{position:relative;z-index:1;}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:56px;}
+.brand-icon{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 40px rgba(255,107,53,0.35);animation:igl 3s ease-in-out infinite alternate;}
+@keyframes igl{from{box-shadow:0 0 30px rgba(255,107,53,0.3);}to{box-shadow:0 0 60px rgba(255,107,53,0.5),0 0 100px rgba(255,140,90,0.2);}}
+.brand-name{font-family:'Inter', sans-serif;font-size:22px;font-weight:700;background:linear-gradient(90deg,var(--cyan2),var(--violet2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero h1{font-family:'Inter', sans-serif;font-size:42px;font-weight:700;line-height:1.15;margin-bottom:20px;}
+.hero h1 span{background:linear-gradient(90deg,var(--cyan2),var(--violet2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{font-size:15px;color:var(--muted2);line-height:1.7;margin-bottom:44px;max-width:380px;}
+.features{display:flex;flex-direction:column;gap:12px;}
+.feat{display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;animation:fi 0.5s ease both;}
+.feat:nth-child(1){animation-delay:0.1s;}.feat:nth-child(2){animation-delay:0.2s;}.feat:nth-child(3){animation-delay:0.3s;}
+@keyframes fi{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:none;}}
+.feat-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.feat-ic.c{background:rgba(255,107,53,0.15);border:1px solid rgba(255,107,53,0.2);}
+.feat-ic.v{background:rgba(255,140,90,0.15);border:1px solid rgba(255,140,90,0.2);}
+.feat-ic.e{background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.25);}
+.feat-txt h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.feat-txt p{font-size:11px;color:var(--muted2);}
+
+/* RIGHT */
+.right{display:flex;align-items:center;justify-content:center;padding:40px;background:var(--bg);overflow-y:auto;}
+.fc{width:100%;max-width:420px;animation:su 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes su{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:none;}}
+
+.role-toggle{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px;margin-bottom:28px;}
+.rb{flex:1;padding:11px;border-radius:10px;border:none;font-family:'Inter', sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.25s;color:var(--muted2);background:transparent;display:flex;align-items:center;justify-content:center;gap:7px;}
+.rb.active{background:linear-gradient(135deg,var(--cyan),var(--violet));color:white;box-shadow:0 4px 20px rgba(255,107,53,0.25);}
+
+.ftitle{font-family:'Inter', sans-serif;font-size:26px;font-weight:700;margin-bottom:5px;}
+.fsub{font-size:13px;color:var(--muted2);margin-bottom:24px;}
+
+.tab-sw{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px;}
+.tb{flex:1;padding:10px;border:none;background:transparent;font-family:'Inter', sans-serif;font-size:13px;font-weight:500;color:var(--muted2);cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;}
+.tb.active{background:var(--surface2);color:var(--cyan2);border-bottom-color:var(--cyan);}
+
+.flash{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.flash.danger{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:var(--red);}
+.flash.success{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--emerald);}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:10px;color:var(--muted2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;font-weight:600;}
+.field input{width:100%;padding:12px 15px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Inter', sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
+.field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(255,107,53,0.1);background:var(--surface2);}
+.field input::placeholder{color:var(--muted);}
+
+.sbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--cyan),var(--violet));border:none;border-radius:12px;color:white;font-family:'Inter', sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:6px;letter-spacing:0.3px;}
+.sbtn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,107,53,0.3);}
+
+.fp{display:none;}.fp.active{display:block;}
+.forgot{display:block;text-align:center;font-size:12px;color:var(--muted2);margin-top:14px;}
+.forgot span{color:var(--cyan2);cursor:pointer;}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:28px;}
+
+/* Forgot password — inline beside the Password label */
+.label-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.forgot-link{font-size:11px;font-weight:600;color:var(--cyan2);cursor:pointer;letter-spacing:0.2px;text-transform:none;transition:color 0.2s,opacity 0.2s;user-select:none;}
+.forgot-link:hover{color:var(--violet2);text-decoration:underline;}
+
+/* Forgot password popup */
+.fp-overlay{display:none;position:fixed;inset:0;background:rgba(3,6,15,0.82);backdrop-filter:blur(5px);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.fp-overlay.open{display:flex;}
+.fp-modal{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:28px;position:relative;animation:fpIn 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 30px 80px rgba(0,0,0,0.6);}
+@keyframes fpIn{from{opacity:0;transform:scale(0.92) translateY(20px);}to{opacity:1;transform:none;}}
+.fp-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;}
+.fp-close:hover{border-color:var(--red);color:var(--red);}
+.fp-icon{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:16px;box-shadow:0 0 30px rgba(255,107,53,0.3);}
+.fp-modal h3{font-family:'Inter', sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;}
+.fp-modal p.fp-text{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:18px;}
+.fp-modal label{display:block;font-size:10px;color:var(--muted2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;font-weight:600;}
+.fp-modal input{width:100%;padding:12px 15px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Inter', sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
+.fp-modal input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(255,107,53,0.1);}
+.fp-err{font-size:12px;color:var(--red);margin-top:8px;display:none;}
+.fp-btn{width:100%;padding:13px;margin-top:18px;background:linear-gradient(135deg,var(--cyan),var(--violet));border:none;border-radius:11px;color:white;font-family:'Inter', sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.fp-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,107,53,0.3);}
+.fp-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+.fp-success-icon{width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px;}
+.fp-success{text-align:center;}
+.fp-success h3{font-family:'Inter', sans-serif;font-size:20px;font-weight:700;margin-bottom:10px;}
+.fp-success p{font-size:13px;color:var(--muted2);line-height:1.65;margin-bottom:6px;}
+
+.pw-meter{height:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:10px;}
+.pw-bar{height:100%;width:0%;background:var(--red);transition:width 0.2s ease,background 0.2s ease;}
+.pw-text{font-size:11px;color:var(--muted2);margin-top:8px;}
+.pw-text b{font-weight:700;}
+.pw-hint{font-size:11px;color:var(--cyan2);margin-top:8px;padding:8px;background:rgba(255,107,53,0.08);border-left:2px solid var(--cyan2);border-radius:4px;font-weight:500;}
+.pw-hint strong{color:var(--cyan2);font-weight:700;}
+
+.pw-input-wrapper{position:relative;display:flex;align-items:center;}
+.pw-input-wrapper input{width:100%;padding:12px 15px 12px 15px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Inter', sans-serif;font-size:14px;outline:none;transition:all 0.2s;padding-right:40px;}
+.pw-input-wrapper input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(255,107,53,0.1);background:var(--surface2);}
+.pw-input-wrapper input::placeholder{color:var(--muted);}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted2);cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;width:28px;height:28px;border-radius:6px;}
+.pw-toggle:hover{color:var(--cyan2);background:rgba(255,107,53,0.1);}
+.pw-toggle svg{width:18px;height:18px;stroke-width:2;}
+.pw-eye,.pw-eye-off{transition:display 0.1s ease;}
+
+@media(max-width:900px){body{grid-template-columns:1fr;}.left{display:none;}}
+h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Playfair Display',serif !important;}
+</style>
+</head>
+<body>
+
+<div class="left">
+  <div class="particles" id="particles"></div>
+  <div class="lc">
+    <div class="brand">
+      <div class="brand-icon">🎓</div>
+      <span class="brand-name">EduBot</span>
+    </div>
+    <div class="hero">
+      <h1>Learn Smarter.<br><span>Not Harder.</span></h1>
+      <p>An adaptive quiz system powered by AI — personalizes every question based on how you perform, identifying weak spots in real-time.</p>
+    </div>
+    <div class="features">
+      <div class="feat"><div class="feat-ic c">🧠</div><div class="feat-txt"><h4>Adaptive Algorithm</h4><p>Questions adapt to your performance in real-time</p></div></div>
+      <div class="feat"><div class="feat-ic v">📊</div><div class="feat-txt"><h4>Topic Insights</h4><p>Know exactly which topics need more revision</p></div></div>
+      <div class="feat"><div class="feat-ic e">🤖</div><div class="feat-txt"><h4>AI-Generated Questions</h4><p>NVIDIA AI generates questions from your syllabus</p></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="right">
+  <div class="fc">
+    <div class="role-toggle">
+      <button class="rb active" id="btn-student" onclick="setRole('student')">👨‍🎓 Student</button>
+      <button class="rb" id="btn-admin" onclick="setRole('admin')">🎓 Admin</button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}
+        <div class="flash {{ cat }}">{{ '✅' if cat=='success' else '⚠️' }} {{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- STUDENT -->
+    <div class="fp active" id="fp-student">
+      <h2 class="ftitle" id="st-title">Welcome back!</h2>
+      <p class="fsub" id="st-sub">Sign in to continue your learning journey.</p>
+      <div class="tab-sw">
+        <button class="tb active" id="tb-login" onclick="setTab('login')">Sign In</button>
+        <button class="tb" id="tb-reg" onclick="setTab('register')">Register</button>
+      </div>
+      <div id="f-login">
+        <form method="POST" action="/auth/student-login">
+          <div class="field"><label>Email Address</label><input type="email" id="login-email" name="email" placeholder="your@email.com" required autofocus /></div>
+          <div class="field">
+            <div class="label-row">
+              <label>Password</label>
+              <span class="forgot-link" onclick="openForgotModal()">🔑 Forgot password?</span>
+            </div>
+            <div class="pw-input-wrapper">
+              <input type="password" class="student-password" name="password" placeholder="Enter your password" required />
+              <button type="button" class="pw-toggle" tabindex="-1" onmousedown="togglePassword(this)" onmouseup="togglePasswordBack(this)" onmouseleave="togglePasswordBack(this)" title="Show/hide password">
+                <svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="sbtn">Sign In →</button>
+        </form>
+      </div>
+      <div id="f-reg" style="display:none">
+        <form method="POST" action="/auth/student-register">
+          <div class="field"><label>Full Name</label><input type="text" id="reg-name" name="name" placeholder="e.g. Arnav Jaiswal" required /></div>
+          <div class="field"><label>Email Address</label><input type="email" id="reg-email" name="email" placeholder="your@email.com" required /></div>
+          <div class="field">
+            <label>Password</label>
+            <div class="pw-input-wrapper">
+              <input type="password" id="reg-password" class="student-password" name="password" placeholder="8+ chars (upper, lower, number)" required minlength="8" />
+              <button type="button" class="pw-toggle" tabindex="-1" onmousedown="togglePassword(this)" onmouseup="togglePasswordBack(this)" onmouseleave="togglePasswordBack(this)" title="Show/hide password">
+                <svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="pw-meter"><div class="pw-bar" id="pw-bar"></div></div>
+            <div class="pw-text" id="pw-text">Strength: <b>—</b></div>
+            <div class="pw-hint">💡 Pattern tip: <strong>Char_Num_Char</strong> (e.g., Pass123word, Welcome456code)</div>
+          </div>
+          <div class="field">
+            <label>Confirm Password</label>
+            <div class="pw-input-wrapper">
+              <input type="password" class="student-password" name="confirm_password" placeholder="Repeat password" required />
+              <button type="button" class="pw-toggle" tabindex="-1" onmousedown="togglePassword(this)" onmouseup="togglePasswordBack(this)" onmouseleave="togglePasswordBack(this)" title="Show/hide password">
+                <svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="sbtn" id="reg-submit">Create Account →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="fp" id="fp-admin">
+      <h2 class="ftitle">Admin Portal</h2>
+      <p class="fsub">Sign in with your admin credentials.</p>
+      <form method="POST" action="/auth/login">
+        <div class="field"><label>Username</label><input type="text" name="username" placeholder="Admin username" required /></div>
+        <div class="field">
+          <label>Password</label>
+          <div class="pw-input-wrapper">
+            <input type="password" class="admin-password" name="password" placeholder="Admin password" required />
+            <button type="button" class="pw-toggle" tabindex="-1" onmousedown="togglePassword(this)" onmouseup="togglePasswordBack(this)" onmouseleave="togglePasswordBack(this)" title="Show/hide password">
+              <svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="sbtn">Sign In as Admin →</button>
+      </form>
+    </div>
+
+    <p class="foot">EduBot © 2026 — Medicaps University, Indore</p>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD POPUP -->
+<div class="fp-overlay" id="fp-overlay" onclick="if(event.target===this)closeForgotModal()">
+  <div class="fp-modal">
+    <button class="fp-close" onclick="closeForgotModal()" title="Close">✕</button>
+
+    <!-- Step 1: request form -->
+    <div id="fp-form-step">
+      <div class="fp-icon">🔑</div>
+      <h3>Forgot your password?</h3>
+      <p class="fp-text">Enter your registered email and we'll notify your admin to reset your password for you.</p>
+      <label>Email Address</label>
+      <input type="email" id="fp-email" placeholder="your@email.com" autocomplete="email" />
+      <div class="fp-err" id="fp-err">Please enter a valid email address.</div>
+      <button class="fp-btn" id="fp-send-btn" onclick="submitForgot()">Send request to admin →</button>
+    </div>
+
+    <!-- Step 2: success confirmation -->
+    <div id="fp-success-step" class="fp-success" style="display:none;">
+      <div class="fp-success-icon">✅</div>
+      <h3>Request sent!</h3>
+      <p><b>A message has been sent to the admin for your password recovery.</b></p>
+      <p>The admin will reset your password and share a temporary one with you. You can then sign in and change it.</p>
+      <button class="fp-btn" onclick="closeForgotModal()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function setRole(r){
+  ['student','admin'].forEach(x=>{
+    document.getElementById('fp-'+x).classList.toggle('active',x===r);
+    document.getElementById('btn-'+x).classList.toggle('active',x===r);
+  });
+}
+function setTab(t){
+  const isL=t==='login';
+  document.getElementById('f-login').style.display=isL?'block':'none';
+  document.getElementById('f-reg').style.display=isL?'none':'block';
+  document.getElementById('tb-login').classList.toggle('active',isL);
+  document.getElementById('tb-reg').classList.toggle('active',!isL);
+  document.getElementById('st-title').textContent=isL?'Welcome back!':'Create Account';
+  document.getElementById('st-sub').textContent=isL?'Sign in to continue your learning journey.':'Register to start your adaptive learning journey.';
+  if (!isL) updatePasswordStrength();
+}
+const p=new URLSearchParams(location.search);
+if(p.get('register')==='1')setTab('register');
+if(p.get('role')==='admin')setRole('admin');
+
+function passwordStrengthLabel(pw, name, email){
+  if(!pw) return 'weak';
+  if(/\s/.test(pw)) return 'weak';
+  if(!/^[A-Za-z0-9]+$/.test(pw)) return 'weak';
+
+  const lowered = pw.toLowerCase();
+  const common = ['password','passw0rd','123456','12345678','qwerty','admin','letmein','welcome','iloveyou','111111','000000'];
+  for (const w of common){
+    if (lowered.includes(w)) return 'weak';
+  }
+
+  if(email){
+    const local = (email.split('@')[0] || '').trim().toLowerCase();
+    if(local && local.length >= 3 && lowered.includes(local)) return 'weak';
+  }
+
+  if(name){
+    const parts = name.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    for(const part of parts){
+      if(part.length >= 3 && lowered.includes(part)) return 'weak';
+    }
+  }
+
+  const hasLower = /[a-z]/.test(pw);
+  const hasUpper = /[A-Z]/.test(pw);
+  const hasDigit = /[0-9]/.test(pw);
+  const categories = [hasLower, hasUpper, hasDigit].filter(Boolean).length;
+
+  if(pw.length >= 8 && categories === 3) return 'strong';
+  if(pw.length >= 8 && categories === 2) return 'medium';
+  return 'weak';
+}
+
+function updatePasswordStrength(){
+  const name = document.getElementById('reg-name')?.value || '';
+  const email = document.getElementById('reg-email')?.value || '';
+  const pw = document.getElementById('reg-password')?.value || '';
+  const label = passwordStrengthLabel(pw, name, email);
+
+  const bar = document.getElementById('pw-bar');
+  const text = document.getElementById('pw-text');
+  const submit = document.getElementById('reg-submit');
+  if(!bar || !text || !submit) return;
+
+  const palette = {
+    weak:   { w: 33, c: 'var(--red)',     t: 'Weak' },
+    medium: { w: 66, c: 'var(--cyan2)',  t: 'Medium' },
+    strong: { w: 100,c: 'var(--emerald)',t: 'Strong' }
+  };
+  const m = palette[label] || palette.weak;
+  bar.style.width = m.w + '%';
+  bar.style.background = m.c;
+  text.innerHTML = 'Strength: <b>' + m.t + '</b> (Medium or Strong accepted; letters/numbers only)';
+
+  submit.disabled = (label === 'weak');
+  submit.style.opacity = submit.disabled ? '0.7' : '1';
+  submit.style.cursor = submit.disabled ? 'not-allowed' : 'pointer';
+}
+
+
+document.getElementById('reg-password')?.addEventListener('input', updatePasswordStrength);
+document.getElementById('reg-email')?.addEventListener('input', updatePasswordStrength);
+document.getElementById('reg-name')?.addEventListener('input', updatePasswordStrength);
+
+// ══════════════════════════════════════════════════
+// SHOW/HIDE PASSWORD TOGGLE WITH EYE ICON
+// ══════════════════════════════════════════════════
+function togglePassword(btn) {
+  const wrapper = btn.closest('.pw-input-wrapper');
+  if (!wrapper) return;
+  
+  const input = wrapper.querySelector('input[type="password"], input[type="text"]');
+  if (!input) return;
+  
+  // Show password
+  input.type = 'text';
+  
+  // Show eye-off icon, hide eye icon
+  const eyeOn = btn.querySelector('.pw-eye');
+  const eyeOff = btn.querySelector('.pw-eye-off');
+  if (eyeOn) eyeOn.style.display = 'none';
+  if (eyeOff) eyeOff.style.display = 'block';
+}
+
+function togglePasswordBack(btn) {
+  const wrapper = btn.closest('.pw-input-wrapper');
+  if (!wrapper) return;
+  
+  const input = wrapper.querySelector('input[type="password"], input[type="text"]');
+  if (!input) return;
+  
+  // Hide password
+  input.type = 'password';
+  
+  // Show eye icon, hide eye-off icon
+  const eyeOn = btn.querySelector('.pw-eye');
+  const eyeOff = btn.querySelector('.pw-eye-off');
+  if (eyeOn) eyeOn.style.display = 'block';
+  if (eyeOff) eyeOff.style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════
+// INTERACTIVE PARTICLE SYSTEM — Drift + Void Circle
+// ══════════════════════════════════════════════════
+const PARTICLE_COUNT = 160;
+const INTERACTION_RADIUS = 200;
+const CIRCLE_RADIUS = 60;
+const FORCE_STRENGTH = 150;
+const RETURN_SPEED = 0.005; // Make them drift more freely
+const DRIFT_SPEED = 0.025; // Faster drift
+
+const colors = ['#ff6b35','#ff8c5a','#ff8c5a','#ffa270','#fbbf24','#ff8c5a','#ffa270','#ff6b35'];
+const pc = document.getElementById('particles');
+const leftPanel = document.querySelector('.left');
+const particles = [];
+let mouse = { x: -9999, y: -9999 };
+let isOnLeft = false;
+
+// ── Void circle DOM element ──
+const voidEl = document.createElement('div');
+voidEl.className = 'void-circle';
+voidEl.style.cssText = 'width:120px;height:120px;left:-9999px;top:-9999px;';
+document.body.appendChild(voidEl);
+
+// ── Mouse tracking ──
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  const rect = leftPanel ? leftPanel.getBoundingClientRect() : null;
+  isOnLeft = rect ? (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) : false;
+
+  if (isOnLeft) {
+    voidEl.style.left = e.clientX + 'px';
+    voidEl.style.top = e.clientY + 'px';
+    voidEl.style.opacity = '1';
+  } else {
+    voidEl.style.opacity = '0';
+  }
+});
+document.addEventListener('mouseleave', () => {
+  mouse.x = -9999; mouse.y = -9999;
+  voidEl.style.opacity = '0';
+  isOnLeft = false;
+});
+
+// ── Create particles ──
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  const size = Math.random() * 3.5 + 1;
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const opacity = Math.random() * 0.55 + 0.15;
+
+  const el = document.createElement('div');
+  el.className = 'particle';
+  el.style.cssText = `width:${size}px;height:${size}px;background:${color};opacity:${opacity};top:0;left:0;`;
+  pc.appendChild(el);
+
+  const ox = Math.random() * 98 + 1;
+  const oy = Math.random() * 98 + 1;
+
+  // Give each particle a unique gentle drift direction
+  const driftAngle = Math.random() * Math.PI * 2;
+  const driftSpeed = (Math.random() * 0.8 + 0.4) * DRIFT_SPEED;
+
+  particles.push({
+    el,
+    ox, oy,
+    x: ox, y: oy,
+    vx: 0, vy: 0,
+    driftAngle,
+    driftSpeed,
+    driftTimer: Math.random() * 1000, // offset so they don't all turn together
+    size
+  });
+}
+
+function getPanelRect() {
+  return leftPanel
+    ? leftPanel.getBoundingClientRect()
+    : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+}
+
+// ── Main animation loop ──
+function animate() {
+  const rect = getPanelRect();
+
+  particles.forEach(p => {
+    // Convert current % position to screen px
+    const px = (p.x / 100) * rect.width + rect.left;
+    const py = (p.y / 100) * rect.height + rect.top;
+
+    // ── Cursor interaction (Forming a circle) ──
+    const dx = px - mouse.x;
+    const dy = py - mouse.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < INTERACTION_RADIUS && dist > 0) {
+      // Force particles towards CIRCLE_RADIUS
+      const force = (CIRCLE_RADIUS - dist) / INTERACTION_RADIUS;
+      const angle = Math.atan2(dy, dx);
+      
+      // Pull/Push towards the circle edge
+      p.vx += Math.cos(angle) * force * FORCE_STRENGTH / rect.width * 100;
+      p.vy += Math.sin(angle) * force * FORCE_STRENGTH / rect.height * 100;
+
+      // Add a slight swirl effect so they rotate around the circle
+      p.vx -= Math.sin(angle) * 0.15;
+      p.vy += Math.cos(angle) * 0.15;
+    }
+
+    // ── Gentle continuous drift ──
+    p.driftTimer += 1;
+    // Slowly rotate drift direction for organic movement
+    p.driftAngle += 0.008 * (Math.sin(p.driftTimer * 0.01) * 0.5);
+    p.vx += Math.cos(p.driftAngle) * p.driftSpeed;
+    p.vy += Math.sin(p.driftAngle) * p.driftSpeed;
+
+    // ── Soft boundary bounce ──
+    if (p.x < 1 || p.x > 99) p.vx *= -0.8;
+    if (p.y < 1 || p.y > 99) p.vy *= -0.8;
+
+    // ── Spring pull toward origin (gentle to keep overall distribution) ──
+    p.vx += (p.ox - p.x) * RETURN_SPEED;
+    p.vy += (p.oy - p.y) * RETURN_SPEED;
+
+    // ── Damping ──
+    p.vx *= 0.85; // Slightly faster damping for more stable circular orbit
+    p.vy *= 0.85;
+
+    // ── Update position ──
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // ── Clamp to bounds ──
+    p.x = Math.max(0.2, Math.min(99.8, p.x));
+    p.y = Math.max(0.2, Math.min(99.8, p.y));
+
+    // ── Apply position ──
+    p.el.style.transform = `translate(${(p.x / 100) * rect.width}px, ${(p.y / 100) * rect.height}px)`;
+  });
+
+  requestAnimationFrame(animate);
+}
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  animate();
+} else {
+  document.getElementById('particles').style.display = 'none';
+}
+
+// ── Click burst ──
+leftPanel?.addEventListener('click', e => {
+  const rect = getPanelRect();
+  const cx = ((e.clientX - rect.left) / rect.width) * 100;
+  const cy = ((e.clientY - rect.top) / rect.height) * 100;
+
+  // Burst void circle size
+  voidEl.style.width = '180px';
+  voidEl.style.height = '180px';
+  setTimeout(() => { voidEl.style.width = '120px'; voidEl.style.height = '120px'; }, 300);
+
+  particles.forEach(p => {
+    const dx = p.x - cx;
+    const dy = p.y - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const burst = 20 / Math.max(dist, 2);
+    p.vx += (dx / dist) * burst;
+    p.vy += (dy / dist) * burst;
+  });
+});
+
+// ── Forgot Password (popup) ──
+function openForgotModal(){
+  const overlay = document.getElementById('fp-overlay');
+  // reset to step 1
+  document.getElementById('fp-form-step').style.display = 'block';
+  document.getElementById('fp-success-step').style.display = 'none';
+  const errEl = document.getElementById('fp-err');
+  if (errEl) errEl.style.display = 'none';
+  const sendBtn = document.getElementById('fp-send-btn');
+  if (sendBtn){ sendBtn.disabled = false; sendBtn.textContent = 'Send request to admin →'; }
+  // prefill from the login email field if the student already typed it
+  const typed = (document.getElementById('login-email')?.value || '').trim();
+  const fpEmail = document.getElementById('fp-email');
+  fpEmail.value = typed;
+  overlay.classList.add('open');
+  setTimeout(() => fpEmail.focus(), 50);
+}
+
+function closeForgotModal(){
+  document.getElementById('fp-overlay').classList.remove('open');
+}
+
+function submitForgot(){
+  const fpEmail = document.getElementById('fp-email');
+  const errEl = document.getElementById('fp-err');
+  const sendBtn = document.getElementById('fp-send-btn');
+  const email = (fpEmail.value || '').trim();
+
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
+    fpEmail.focus();
+    return;
+  }
+  errEl.style.display = 'none';
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Sending…';
+
+  fetch('/auth/forgot-password', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+    body: JSON.stringify({ email })
+  })
+  .then(r => r.json().catch(() => ({ success: true })))
+  .then(() => {
+    // Admin receives the request regardless — always confirm to the student
+    document.getElementById('fp-form-step').style.display = 'none';
+    document.getElementById('fp-success-step').style.display = 'block';
+  })
+  .catch(() => {
+    errEl.textContent = 'Could not reach the server. Please check your connection and try again.';
+    errEl.style.display = 'block';
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send request to admin →';
+  });
+}
+
+// Enter submits from the email field; Esc closes the popup
+document.getElementById('fp-email')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter'){ e.preventDefault(); submitForgot(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeForgotModal();
+});
+
+</script>
+</body>
+</html>

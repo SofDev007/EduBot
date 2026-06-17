@@ -1,0 +1,442 @@
+<!-- Floating Progress Button Component -->
+<style>
+    /* Floating Button Container */
+    #floatingProgress {
+        position: fixed;
+        bottom: 40px;
+        right: 40px;
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        box-shadow: 0 8px 30px rgba(34, 211, 238, 0.4);
+        z-index: 1000;
+        animation: floatIn 0.5s ease-out;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Show the floating button */
+    #floatingProgress.show {
+        display: flex;
+    }
+
+    /* Floating Animation */
+    @keyframes floatIn {
+        from {
+            opacity: 0;
+            transform: translate(30px, 30px) scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+        }
+    }
+
+    /* Jump/Pulse Animation when time changes */
+    @keyframes timePulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.15);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Apply pulse when time updates */
+    #floatingProgress.pulse {
+        animation: timePulse 0.6s ease-in-out;
+    }
+
+    /* Smooth Floating Motion */
+    @keyframes smoothFloat {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    #floatingProgress.generating {
+        animation: smoothFloat 3s ease-in-out infinite;
+    }
+
+    /* Time Display */
+    #progressTime {
+        font-size: 28px;
+        font-weight: 800;
+        color: white;
+        font-family: 'Inter', sans-serif;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Label Text */
+    #progressLabel {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-top: 4px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Progress Ring (SVG) */
+    #progressRing {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+
+    .progress-circle {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.3);
+        stroke-width: 3;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.3s ease;
+    }
+
+    .progress-circle-fill {
+        fill: none;
+        stroke: white;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 376.99;
+        stroke-dashoffset: 376.99;
+    }
+
+    /* Hover Effects */
+    #floatingProgress:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 40px rgba(34, 211, 238, 0.6);
+    }
+
+    /* Loading Spinner Inside */
+    .spinner-small {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Status Indicator */
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #22c55e;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        animation: statusPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.6;
+            transform: scale(1.2);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        #floatingProgress {
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+        }
+
+        #progressTime {
+            font-size: 24px;
+        }
+
+        #progressLabel {
+            font-size: 10px;
+        }
+    }
+
+    /* Close Button on Floating Progress */
+    .close-float {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .close-float:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+    }
+
+    /* Tooltip on hover */
+    #floatingProgress::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+
+    #floatingProgress:hover::after {
+        opacity: 1;
+    }
+</style>
+
+<!-- Floating Progress Button HTML -->
+<div id="floatingProgress" class="show" data-tooltip="Generation in progress...">
+    <!-- Status Indicator Dot -->
+    <div class="status-dot"></div>
+    
+    <!-- Spinner -->
+    <div class="spinner-small"></div>
+    
+    <!-- Progress Ring (SVG) -->
+    <svg id="progressRing">
+        <circle cx="60" cy="60" r="55" class="progress-circle"></circle>
+        <circle cx="60" cy="60" r="55" class="progress-circle-fill" id="progressFill"></circle>
+    </svg>
+    
+    <!-- Time Display -->
+    <div id="progressTime">00:00</div>
+    <div id="progressLabel">Generating...</div>
+    
+    <!-- Close Button -->
+    <button class="close-float" id="closeFloating">✕</button>
+</div>
+
+<!-- JavaScript for Floating Progress -->
+<script>
+    class FloatingProgress {
+        constructor() {
+            this.floatingBtn = document.getElementById('floatingProgress');
+            this.timeDisplay = document.getElementById('progressTime');
+            this.labelDisplay = document.getElementById('progressLabel');
+            this.closeBtn = document.getElementById('closeFloating');
+            this.progressFill = document.getElementById('progressFill');
+            
+            this.startTime = null;
+            this.estimatedDuration = 600; // 10 minutes in seconds
+            this.elapsedTime = 0;
+            this.intervalId = null;
+            this.isGenerating = false;
+            
+            this.setupEventListeners();
+        }
+
+        setupEventListeners() {
+            this.closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.hide();
+            });
+
+            // Hide when generation is complete
+            document.addEventListener('generationComplete', () => {
+                setTimeout(() => this.completeGeneration(), 1000);
+            });
+        }
+
+        // Start the floating progress timer
+        start(estimatedSeconds = 600) {
+            if (this.isGenerating) return;
+            
+            this.isGenerating = true;
+            this.estimatedDuration = estimatedSeconds;
+            this.startTime = Date.now();
+            this.elapsedTime = 0;
+            
+            this.show();
+            this.startTimer();
+        }
+
+        // Update elapsed time every second
+        startTimer() {
+            // Clear any existing interval
+            if (this.intervalId) clearInterval(this.intervalId);
+
+            this.intervalId = setInterval(() => {
+                this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
+                this.updateDisplay();
+            }, 1000);
+        }
+
+        // Update the time display and progress ring
+        updateDisplay() {
+            const minutes = Math.floor(this.elapsedTime / 60);
+            const seconds = this.elapsedTime % 60;
+            const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            // Update time display with pulse animation
+            if (this.timeDisplay.textContent !== timeString) {
+                this.timeDisplay.textContent = timeString;
+                this.triggerPulse();
+            }
+
+            // Update progress ring
+            const progress = Math.min((this.elapsedTime / this.estimatedDuration) * 100, 100);
+            const circumference = 2 * Math.PI * 55; // radius = 55
+            const offset = circumference - (progress / 100) * circumference;
+            this.progressFill.style.strokeDashoffset = offset;
+
+            // Update label
+            const remainingSeconds = Math.max(0, this.estimatedDuration - this.elapsedTime);
+            const remainingMinutes = Math.ceil(remainingSeconds / 60);
+            this.labelDisplay.textContent = remainingMinutes > 0 ? `${remainingMinutes}m left` : 'Almost done...';
+        }
+
+        // Trigger pulse animation when time changes
+        triggerPulse() {
+            this.floatingBtn.classList.remove('pulse');
+            // Trigger reflow to restart animation
+            void this.floatingBtn.offsetWidth;
+            this.floatingBtn.classList.add('pulse');
+        }
+
+        // Show the floating button with smooth animation
+        show() {
+            this.floatingBtn.classList.add('show', 'generating');
+            this.updateDisplay();
+        }
+
+        // Hide the floating button
+        hide() {
+            this.floatingBtn.classList.remove('show', 'generating');
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+            }
+            this.isGenerating = false;
+        }
+
+        // Complete generation with success animation
+        completeGeneration() {
+            clearInterval(this.intervalId);
+            this.labelDisplay.textContent = '✓ Complete!';
+            this.floatingBtn.classList.remove('generating');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => this.hide(), 3000);
+        }
+
+        // Update estimated duration (for WebSocket updates)
+        updateEstimate(newDuration) {
+            this.estimatedDuration = newDuration;
+            this.triggerPulse();
+        }
+    }
+
+    // Initialize floating progress globally
+    window.floatingProgress = new FloatingProgress();
+
+    // Hide on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        window.floatingProgress.hide();
+    });
+
+    // Advanced: Fetch real-time progress from server
+    class RealTimeProgress {
+        constructor() {
+            this.pollInterval = null;
+            this.isPolling = false;
+        }
+
+        startPolling(checkInterval = 2000) {
+            if (this.isPolling) return;
+            
+            this.isPolling = true;
+            this.pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/admin/api/generation-progress');
+                    const data = await response.json();
+                    
+                    if (data.status === 'generating') {
+                        // Update floating progress with real data
+                        const progress = data.progress_percent;
+                        const currentQuestions = data.current_questions;
+                        const totalQuestions = data.total_questions;
+                        const currentBatch = data.current_batch;
+                        const totalBatches = data.total_batches;
+                        
+                        // Update display
+                        window.floatingProgress.labelDisplay.textContent = 
+                            `${currentBatch}/${totalBatches} batches (${currentQuestions}/${totalQuestions} Q)`;
+                        
+                        // Update progress ring
+                        const circumference = 2 * Math.PI * 55;
+                        const offset = circumference - (progress / 100) * circumference;
+                        window.floatingProgress.progressFill.style.strokeDashoffset = offset;
+                    } else if (data.status === 'complete') {
+                        // Generation complete
+                        this.stopPolling();
+                        window.floatingProgress.completeGeneration();
+                    } else if (data.status === 'error') {
+                        // Error occurred
+                        this.stopPolling();
+                        window.floatingProgress.labelDisplay.textContent = '✗ Error!';
+                        window.floatingProgress.hide();
+                    }
+                } catch (error) {
+                    console.log('[POLL] Unable to fetch progress (normal if page redirected)', error);
+                }
+            }, checkInterval);
+        }
+
+        stopPolling() {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+                this.pollInterval = null;
+                this.isPolling = false;
+            }
+        }
+    }
+
+    // Initialize real-time progress tracker
+    window.realTimeProgress = new RealTimeProgress();
+</script>

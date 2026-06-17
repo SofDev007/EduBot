@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% set active_page = 'dashboard' %}
+
+{% block title %}Dashboard — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Stats grid ── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 16px;
+  transition: all 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,107,53,0.04), rgba(255,140,90,0.04));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.stat-card:hover .stat-arrow { opacity: 1; transform: translateX(0); }
+.stat-icon  { font-size: 20px; margin-bottom: 12px; }
+.stat-num   { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.stat-lbl   { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-arrow { font-size: 11px; color: var(--muted); position: absolute; top: 16px; right: 14px; opacity: 0; transform: translateX(-4px); transition: all 0.2s; }
+.stat-card.c1 .stat-num { color: var(--cyan); }
+.stat-card.c2 .stat-num { color: var(--violet); }
+.stat-card.c3 .stat-num { color: var(--emerald); }
+.stat-card.c4 .stat-num { color: var(--amber); }
+.stat-card.c5 .stat-num { color: var(--muted2); }
+
+/* ── Quick actions ── */
+.actions { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+.sec-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+/* ── Subject cards ── */
+.subj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.subj-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.subj-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.subj-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+.subj-card:hover::before { opacity: 1; }
+.subj-card h3 { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.subj-card p  { font-size: 12px; color: var(--muted); min-height: 32px; line-height: 1.5; margin-bottom: 14px; }
+.subj-meta    { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.subj-acts    { display: flex; gap: 8px; }
+.subj-acts a, .subj-acts button {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--muted2);
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.subj-acts a:hover  { border-color: var(--cyan);  color: var(--cyan); }
+.subj-acts .del:hover { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.05); }
+
+/* ── Modal list ── */
+.m-list  { display: flex; flex-direction: column; gap: 8px; }
+.m-item  { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; }
+.m-item .mi-left h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.m-item .mi-left p  { font-size: 11px; color: var(--muted); }
+.m-item .mi-right   { font-size: 12px; color: var(--cyan); font-family: 'Inter', sans-serif; font-weight: 700; }
+.m-spinner          { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+
+/* ── Skeleton cards in modal ── */
+.m-skeleton { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; position: relative; }
+.m-skeleton::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent); animation: sk-shimmer 1.2s ease-in-out infinite; }
+@keyframes sk-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.sk-left { display: flex; flex-direction: column; gap: 6px; }
+.sk-line { height: 11px; border-radius: 5px; background: var(--border2); }
+.sk-line.w-60 { width: 120px; }
+.sk-line.w-40 { width: 80px; }
+.sk-chip { width: 40px; height: 20px; border-radius: 10px; background: var(--border2); }
+
+/* ── Responsive stat grid ── */
+@media (max-width: 1100px) { .stats { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px)  { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── Analytics charts ── */
+.charts-row { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 28px; }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.chart-title { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.chart-wrap  { position: relative; }
+@media (max-width: 900px)  { .charts-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <h2>Dashboard</h2>
+    <p>Overview of your adaptive learning system</p>
+  </div>
+  <a href="/admin/subject/create" class="btn btn-p">➕ New Subject</a>
+</div>
+
+<div class="stats">
+  <a href="#" class="stat-card c1" onclick="openModal('students');return false;">
+    <span class="stat-arrow">→</span>
+    <div class="stat-icon">👥</div>
+    <div class="stat-num">{{ total_students }}</div>
+    <div class="stat-lbl">Students</div>
+  </a>
+  <a href="#" class="stat-card c2" onclick="openModal('sessions');return false;">
+    <span class="stat-arrow">→</span>
+    <div class="stat-icon">🎯</div>
+    <div class="stat-num">{{ total_sessions }}</div>
+    <div class="stat-lbl">Sessions</div>
+  </a>
+  <a href="/admin/reports" class="stat-card c3">
+    <span class="stat-arrow">→</span>
+    <div class="stat-icon">✅</div>
+    <div class="stat-num">{{ completed_sessions }}</div>
+    <div class="stat-lbl">Completed</div>
+  </a>
+  <a href="/admin/questions" class="stat-card c4">
+    <span class="stat-arrow">→</span>
+    <div class="stat-icon">📝</div>
+    <div class="stat-num">{{ total_questions }}</div>
+    <div class="stat-lbl">Questions</div>
+  </a>
+  <a href="#" class="stat-card c5" onclick="openModal('subjects');return false;">
+    <span class="stat-arrow">→</span>
+    <div class="stat-icon">📚</div>
+    <div class="stat-num">{{ total_subjects }}</div>
+    <div class="stat-lbl">Subjects</div>
+  </a>
+</div>
+
+<div class="actions">
+  <a href="/admin/upload"          class="btn btn-g">📤 Upload Syllabus</a>
+  <a href="/admin/questions"       class="btn btn-g">📝 All Questions</a>
+  <a href="/admin/reports"         class="btn btn-g">📋 Reports</a>
+  <a href="/admin/reset-password"  class="btn btn-g">🔐 Reset Password</a>
+</div>
+
+{% if subjects %}
+<div class="sec-title">Analytics</div>
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title">Session Completion</div>
+    <div class="chart-wrap"><canvas id="sessions-chart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Questions by Subject</div>
+    <div class="chart-wrap"><canvas id="subjects-chart"></canvas></div>
+  </div>
+</div>
+{% endif %}
+
+<div class="sec-title">Your Subjects</div>
+{% if subjects %}
+<div class="subj-grid">
+  {% for s in subjects %}
+  <div class="subj-card">
+    <h3>{{ s.name }}</h3>
+    <p>{{ s.description or 'No description provided.' }}</p>
+    <div class="subj-meta"><span class="badge">{{ s.questions|length }} Questions</span></div>
+    <div class="subj-acts">
+      <a href="/admin/upload?subject_id={{ s.id }}">📤 Upload</a>
+      <a href="/admin/questions?subject_id={{ s.id }}">👁️ Questions</a>
+      <form method="POST" action="/admin/subject/{{ s.id }}/delete" style="flex:1">
+        <button type="submit" class="del" onclick="return confirm('Delete this subject and all its questions?')">🗑️</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="ei">📭</div>
+  <p>No subjects yet.</p>
+  <a href="/admin/subject/create" class="btn btn-p" style="display:inline-flex;margin-top:16px;">➕ Create Subject</a>
+</div>
+{% endif %}
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    <h3 id="modal-title">Details</h3>
+    <p class="m-sub" id="modal-sub"></p>
+    <div class="m-list" id="modal-body"><div class="m-spinner">Loading...</div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+{% if subjects %}
+(function() {
+  const cs = getComputedStyle(document.documentElement);
+  const cyan    = cs.getPropertyValue('--cyan').trim();
+  const emerald = cs.getPropertyValue('--emerald').trim();
+  const amber   = cs.getPropertyValue('--amber').trim();
+  const muted   = cs.getPropertyValue('--muted').trim();
+  const text    = cs.getPropertyValue('--text').trim();
+  const surface2 = cs.getPropertyValue('--surface2').trim();
+  const border  = cs.getPropertyValue('--border').trim();
+
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = muted;
+
+  const tip = {
+    backgroundColor: surface2, borderColor: border, borderWidth: 1,
+    titleColor: text, bodyColor: muted, padding: 10,
+  };
+
+  const completed = {{ completed_sessions }};
+  const inProgress = Math.max(0, {{ total_sessions }} - completed);
+
+  new Chart(document.getElementById('sessions-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'In Progress'],
+      datasets: [{
+        data: [completed, inProgress],
+        backgroundColor: [emerald + '33', amber + '33'],
+        borderColor: [emerald, amber],
+        borderWidth: 2,
+        hoverBackgroundColor: [emerald + '55', amber + '55'],
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '72%',
+      plugins: { legend: { position: 'bottom', labels: { padding: 14, boxWidth: 12, font: { size: 12 } } }, tooltip: { callbacks: {}, ...tip } }
+    }
+  });
+
+  const subjects = [{% for s in subjects %}{"name": {{ s.name|tojson }}, "count": {{ s.questions|length }}}{% if not loop.last %},{% endif %}{% endfor %}];
+  new Chart(document.getElementById('subjects-chart'), {
+    type: 'bar',
+    data: {
+      labels: subjects.map(s => s.name.length > 14 ? s.name.slice(0, 13) + '…' : s.name),
+      datasets: [{
+        label: 'Questions',
+        data: subjects.map(s => s.count),
+        backgroundColor: cyan + '22',
+        borderColor: cyan,
+        borderWidth: 2,
+        borderRadius: 6,
+        hoverBackgroundColor: cyan + '44',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: tip },
+      scales: {
+        x: { grid: { color: border }, ticks: { color: muted, font: { size: 11 } } },
+        y: { grid: { color: border }, ticks: { color: muted, font: { size: 11 }, stepSize: 1 }, beginAtZero: true }
+      }
+    }
+  });
+})();
+{% endif %}
+
+function skeletons(n = 4) {
+  return Array.from({ length: n }, () =>
+    `<div class="m-skeleton"><div class="sk-left"><div class="sk-line w-60"></div><div class="sk-line w-40"></div></div><div class="sk-chip"></div></div>`
+  ).join('');
+}
+
+function openModal(type) {
+  document.getElementById('modal-overlay').classList.add('open');
+  const body = document.getElementById('modal-body');
+  body.innerHTML = skeletons(4);
+
+  const configs = {
+    students: { title: 'All Students', sub: 'Students registered in the system', url: '/admin/api/students',
+      render: s => `<div class="m-item"><div class="mi-left"><h4>${s.name}</h4><p>${s.email}</p></div><div class="mi-right">${s.session_count} sessions</div></div>` },
+    sessions: { title: 'All Sessions', sub: 'All quiz sessions in the system', url: '/admin/api/sessions',
+      render: s => `<div class="m-item"><div class="mi-left"><h4>${s.student}</h4><p>${s.subject} · ${s.started_at}</p></div><div class="mi-right" style="color:${s.status==='completed'?'var(--emerald)':'var(--amber)'}">${s.status}</div></div>` },
+    subjects: { title: 'All Subjects', sub: 'Subjects and their question counts', url: '/api/subjects',
+      render: s => `<div class="m-item"><div class="mi-left"><h4>${s.name}</h4><p>${s.description||'No description'}</p></div><div class="mi-right">${s.question_count} questions</div></div>` },
+  };
+
+  const cfg = configs[type];
+  if (!cfg) return;
+  document.getElementById('modal-title').textContent = cfg.title;
+  document.getElementById('modal-sub').textContent = cfg.sub;
+
+  fetch(cfg.url)
+    .then(r => r.json())
+    .then(data => {
+      const list = data.subjects || data;
+      if (!list.length) { body.innerHTML = '<div class="m-spinner">Nothing here yet.</div>'; return; }
+      body.innerHTML = list.map(cfg.render).join('');
+    })
+    .catch(() => { body.innerHTML = '<div class="m-spinner">⚠️ Could not load data.</div>'; });
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+{% endblock %}

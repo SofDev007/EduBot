@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% set active_page = 'students' %}
+
+{% block title %}Students — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Filter bar ── */
+.filter-bar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+.search-wrap { position: relative; flex: 1; max-width: 400px; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--cyan); }
+.search-input::placeholder { color: var(--muted); }
+.count-badge { font-size: 12px; color: var(--muted2); padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; white-space: nowrap; }
+.count-badge b { color: var(--cyan); font-weight: 700; }
+
+/* ── Table extras ── */
+td.name-cell     { font-weight: 600; color: var(--text); }
+td.email-cell    { color: var(--muted2); font-size: 12px; }
+td.meta-cell     { color: var(--muted2); font-size: 12px; }
+td.sessions-cell { font-family: 'Inter', sans-serif; font-weight: 700; color: var(--cyan); font-size: 13px; }
+tbody tr.hidden-row { display: none; }
+tbody tr.row-focus { box-shadow: inset 3px 0 0 var(--cyan); animation: rowPulse 1.8s ease-out 1; }
+@keyframes rowPulse { 0% { background: rgba(255,107,53,0.30); } 100% { background: transparent; } }
+
+/* ── Actions ── */
+.btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--muted2);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+.btn-reset:hover { border-color: var(--amber); color: var(--amber); }
+.btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.no-results { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; display: none; }
+
+/* ── Pagination ── */
+.pagination { display: flex; align-items: center; gap: 6px; padding: 16px 20px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.pg-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 10px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+  border: 1px solid var(--border2); background: var(--surface2); color: var(--muted2);
+  cursor: pointer; transition: all 0.15s;
+}
+.pg-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.pg-btn.active { background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #0a0a0a; border-color: transparent; }
+.pg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.pg-info { font-size: 12px; color: var(--muted2); margin-left: auto; }
+
+/* ── Alphabet index ── */
+.alpha-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+.alpha-btn {
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.alpha-btn:hover,
+.alpha-btn.active-letter { background: var(--surface2); border-color: var(--cyan); color: var(--cyan); }
+.alpha-btn.disabled   { opacity: 0.3; cursor: default; pointer-events: none; }
+.alpha-btn.all-btn    { color: var(--muted2); }
+
+/* ── Password modal extras ── */
+.pw-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+.pw-box .pw-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; margin-bottom: 6px; }
+.pw-value { font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 800; color: var(--cyan); letter-spacing: 2px; word-break: break-all; }
+.pw-note { font-size: 11px; color: var(--muted2); line-height: 1.5; margin-bottom: 16px; }
+.pw-note b { color: var(--amber); }
+.btn-copy { width: 100%; padding: 10px; border-radius: 8px; background: linear-gradient(135deg, var(--cyan), var(--violet)); border: none; color: #0a0a0a; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-copy:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,53,0.25); }
+.btn-copy.copied { background: var(--emerald); }
+
+.badge-dup { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); cursor: help; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <h2>Students</h2>
+    <p>All registered students — alphabetically sorted</p>
+  </div>
+</div>
+
+{% if student_data %}
+<!-- Alphabet index -->
+<div class="alpha-bar" id="alpha-bar">
+  <button class="alpha-btn all-btn active-letter" onclick="filterLetter('')">All</button>
+  {% set letters = [] %}
+  {% for item in student_data %}
+    {% set first = item.student.name[0]|upper %}
+    {% if first not in letters %}{% set _ = letters.append(first) %}{% endif %}
+  {% endfor %}
+  {% for ch in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+    <button class="alpha-btn {% if ch not in letters %}disabled{% endif %}" onclick="filterLetter('{{ ch }}')">{{ ch }}</button>
+  {% endfor %}
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+  <div class="search-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input class="search-input" id="search-input" type="text" placeholder="Search by name or email…" oninput="applyFilters()" aria-label="Search students" />
+  </div>
+  <div class="count-badge" id="count-badge">Showing <b id="visible-count">{{ student_data|length }}</b> of <b>{{ student_data|length }}</b> students</div>
+</div>
+
+<!-- Duplicate warning -->
+{% set dup_names = [] %}
+{% set seen_names = [] %}
+{% for item in student_data %}
+  {% set nm = item.student.name|lower %}
+  {% if nm in seen_names and nm not in dup_names %}{% set _ = dup_names.append(nm) %}{% endif %}
+  {% if nm not in seen_names %}{% set _ = seen_names.append(nm) %}{% endif %}
+{% endfor %}
+{% if dup_names %}
+<div class="flash danger">⚠️ <b>{{ dup_names|length }} duplicate name(s) detected.</b> Students sharing the same name are flagged below.</div>
+{% endif %}
+
+<div class="table-wrap">
+  <table id="students-table">
+    <thead>
+      <tr>
+        <th>#</th><th>Name</th><th>Email</th><th>Joined</th>
+        <th>Sessions</th><th>Completed</th><th>Password</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="students-tbody">
+      {% for item in student_data %}
+      {% set s = item.student %}
+      {% set is_dup = s.name|lower in dup_names %}
+      <tr data-name="{{ s.name|lower }}" data-email="{{ s.email|lower }}" data-letter="{{ s.name[0]|upper }}">
+        <td class="meta-cell">{{ loop.index }}</td>
+        <td class="name-cell">
+          {{ s.name }}
+          {% if is_dup %}<span class="badge badge-dup" title="Another student has the same name — verify emails">⚠ Duplicate</span>{% endif %}
+        </td>
+        <td class="email-cell">{{ s.email }}</td>
+        <td class="meta-cell">{{ s.created_at.strftime('%d %b %Y') if s.created_at else '—' }}</td>
+        <td class="sessions-cell">{{ item.session_count }}</td>
+        <td class="meta-cell" style="color:var(--emerald)">{{ item.completed_count }}</td>
+        <td>
+          {% if s.password_hash %}
+            <span class="badge badge-green">✓ Set</span>
+          {% else %}
+            <span class="badge badge-amber">✗ None</span>
+          {% endif %}
+        </td>
+        <td>
+          <button class="btn-reset" data-student-id="{{ s.id }}" data-student-name="{{ s.name }}" onclick="resetPassword(this)">🔑 Reset PW</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="no-results" id="no-results">No students match your search.</div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+{% else %}
+<div class="empty">
+  <div class="ei">👤</div>
+  <p>No students registered yet.</p>
+</div>
+{% endif %}
+
+<!-- Password reset modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    <h3>Password Reset</h3>
+    <p class="m-sub" id="modal-sub">Temporary password generated</p>
+    <div class="pw-box">
+      <div class="pw-label">Temporary Password</div>
+      <div class="pw-value" id="temp-pw">—</div>
+    </div>
+    <p class="pw-note">Share this with the student. <b>They should change it after logging in.</b></p>
+    <button class="btn-copy" id="copy-btn" onclick="copyPassword()">Copy Password</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PAGE_SIZE = 25;
+let currentPage = 1;
+let activeLetterFilter = '';
+let currentTempPw = '';
+
+// Returns all rows that match current search + letter filter
+function getFilteredRows() {
+  const q = (document.getElementById('search-input') || {}).value || '';
+  const search = q.trim().toLowerCase();
+  return [...document.querySelectorAll('#students-tbody tr')].filter(row => {
+    const name   = row.dataset.name   || '';
+    const email  = row.dataset.email  || '';
+    const letter = row.dataset.letter || '';
+    const matchSearch = !search || name.includes(search) || email.includes(search);
+    const matchLetter = !activeLetterFilter || letter === activeLetterFilter;
+    return matchSearch && matchLetter;
+  });
+}
+
+function renderPage() {
+  const filtered = getFilteredRows();
+  const total    = filtered.length;
+  const pages    = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  currentPage    = Math.min(currentPage, pages);
+  const start    = (currentPage - 1) * PAGE_SIZE;
+  const end      = start + PAGE_SIZE;
+
+  // Show/hide rows
+  document.querySelectorAll('#students-tbody tr').forEach(r => r.classList.add('hidden-row'));
+  filtered.slice(start, end).forEach(r => r.classList.remove('hidden-row'));
+
+  // Update count badge
+  const visEl = document.getElementById('visible-count');
+  if (visEl) visEl.textContent = total;
+  const noRes = document.getElementById('no-results');
+  if (noRes) noRes.style.display = total === 0 ? 'block' : 'none';
+
+  // Render pagination controls
+  const pg = document.getElementById('pagination');
+  if (!pg) return;
+  if (pages <= 1) { pg.innerHTML = ''; return; }
+
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>←</button>`;
+  // Show up to 7 page buttons with ellipsis
+  const range = pageBtns(currentPage, pages);
+  range.forEach(p => {
+    if (p === '…') html += `<span class="pg-btn" style="cursor:default;pointer-events:none">…</span>`;
+    else html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  html += `<button class="pg-btn" onclick="goPage(${currentPage + 1})" ${currentPage === pages ? 'disabled' : ''}>→</button>`;
+  html += `<span class="pg-info">Page ${currentPage} of ${pages} · ${total} students</span>`;
+  pg.innerHTML = html;
+}
+
+function pageBtns(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, '…', total];
+  if (current >= total - 3) return [1, '…', total-4, total-3, total-2, total-1, total];
+  return [1, '…', current-1, current, current+1, '…', total];
+}
+
+function goPage(page) {
+  currentPage = page;
+  renderPage();
+  document.querySelector('.table-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function applyFilters() {
+  currentPage = 1;
+  renderPage();
+}
+
+function filterLetter(letter) {
+  activeLetterFilter = letter;
+  document.querySelectorAll('.alpha-btn').forEach(btn => btn.classList.remove('active-letter'));
+  const clicked = [...document.querySelectorAll('.alpha-btn')].find(b => b.textContent.trim() === (letter || 'All'));
+  if (clicked) clicked.classList.add('active-letter');
+  currentPage = 1;
+  renderPage();
+}
+
+function resetPassword(btn) {
+  const studentId = btn.dataset.studentId;
+  const studentName = btn.dataset.studentName;
+  btn.disabled = true;
+  btn.textContent = '⏳ Resetting…';
+  fetch('/admin/api/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ student_id: studentId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.textContent = '🔑 Reset PW';
+    if (data.success) {
+      currentTempPw = data.temp_password;
+      document.getElementById('modal-sub').textContent = 'Password reset for ' + studentName;
+      document.getElementById('temp-pw').textContent = data.temp_password;
+      document.getElementById('copy-btn').textContent = 'Copy Password';
+      document.getElementById('copy-btn').classList.remove('copied');
+      document.getElementById('modal-overlay').classList.add('open');
+    } else {
+      showToast('Error: ' + (data.error || 'Could not reset password.'), 'danger');
+    }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.textContent = '🔑 Reset PW';
+    showToast('Network error. Please try again.', 'danger');
+  });
+}
+
+function copyPassword() {
+  if (!currentTempPw) return;
+  navigator.clipboard.writeText(currentTempPw).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    showToast('Password copied to clipboard!', 'success');
+    setTimeout(() => { btn.textContent = 'Copy Password'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  currentTempPw = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Initial render
+renderPage();
+
+// Focus a student when arriving from the Issues section (?focus=<email>)
+(function () {
+  const params = new URLSearchParams(location.search);
+  const focus = (params.get('focus') || '').trim().toLowerCase();
+  if (!focus) return;
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) { searchInput.value = focus; renderPage(); }
+  // Find which page the match is on and navigate there
+  const filtered = getFilteredRows();
+  const matchIdx = filtered.findIndex(r => (r.dataset.email || '') === focus || (r.dataset.name || '') === focus);
+  if (matchIdx >= 0) {
+    goPage(Math.floor(matchIdx / PAGE_SIZE) + 1);
+    const match = filtered[matchIdx];
+    match.classList.add('row-focus');
+    setTimeout(() => match.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+  }
+})();
+</script>
+{% endblock %}

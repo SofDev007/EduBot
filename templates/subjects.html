@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% set active_page = 'subjects' %}
+
+{% block title %}Subjects — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+.subj-list { display: flex; flex-direction: column; gap: 14px; }
+.subj-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.subj-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.subj-card:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
+.subj-card:hover::before { opacity: 1; }
+.subj-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.subj-info h3 { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+.subj-info p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.subj-meta { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.badge-date { background: rgba(255,140,90,0.1); color: var(--violet); border-color: rgba(255,140,90,0.2); }
+.subj-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.subj-acts a,
+.subj-acts button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--muted2);
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.subj-acts a:hover { border-color: var(--cyan); color: var(--cyan); }
+.subj-acts .del:hover { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.05); }
+
+/* Edit pencil */
+.edit-pencil {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 9px;
+  background: var(--surface2); border: 1px solid var(--border2); color: var(--muted2);
+  font-size: 15px; cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.edit-pencil:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-1px); }
+.flip-x { display: inline-block; transform: scaleX(-1); }
+
+/* Edit modal */
+.edit-overlay { display: none; position: fixed; inset: 0; z-index: 300; padding: 20px;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+.edit-overlay.open { display: flex; }
+.edit-modal { width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.6); animation: pageIn 0.25s ease; }
+.edit-modal h3 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.edit-modal .sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.edit-modal label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--muted2); margin: 14px 0 6px; }
+.edit-modal input, .edit-modal textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 14px; outline: none; transition: border-color 0.2s; resize: vertical; }
+.edit-modal input:focus, .edit-modal textarea:focus { border-color: var(--cyan); }
+.edit-actions { display: flex; gap: 10px; margin-top: 22px; }
+.edit-actions button { flex: 1; padding: 11px; border-radius: 10px; font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); transition: all 0.2s; }
+.edit-actions .save { background: var(--cyan); color: #0a0a0a; border-color: transparent; }
+.edit-actions .save:hover { filter: brightness(1.08); }
+.edit-actions .cancel { background: var(--surface2); color: var(--text); }
+.edit-actions .cancel:hover { border-color: var(--red); color: var(--red); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <h2>Subjects</h2>
+    <p>All subjects available in the system</p>
+  </div>
+  <a href="/admin/subject/create" class="btn btn-p">➕ New Subject</a>
+</div>
+
+{% if subjects %}
+<div class="subj-list">
+  {% for s in subjects %}
+  <div class="subj-card">
+    <div class="subj-top">
+      <div class="subj-info">
+        <h3>{{ s.name }}</h3>
+        <p>{{ s.description or 'No description provided.' }}</p>
+      </div>
+      <button type="button" class="edit-pencil" title="Edit name & description"
+        data-id="{{ s.id }}" data-name="{{ s.name }}" data-desc="{{ s.description or '' }}"><span class="flip-x">✏️</span></button>
+    </div>
+    <div class="subj-meta">
+      <span class="badge">{{ s.questions|length }} Questions</span>
+      <span class="badge badge-date">Created: {{ s.created_at | format_date_only }}</span>
+    </div>
+    <div class="subj-acts">
+      <a href="/admin/upload?subject_id={{ s.id }}">📤 Upload Questions</a>
+      <a href="/admin/questions?subject_id={{ s.id }}">👁️ View Questions ({{ s.questions|length }})</a>
+      <form method="POST" action="/admin/subject/{{ s.id }}/delete" style="display:inline">
+        <button type="submit" class="del" onclick="return confirm('Delete subject and ALL its questions?')">🗑️ Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="ei">📭</div>
+  <p>No subjects yet. Create your first one!</p>
+  <a href="/admin/subject/create" class="btn btn-p" style="display:inline-flex;margin-top:16px;">➕ Create Subject</a>
+</div>
+{% endif %}
+
+<!-- Edit subject modal -->
+<div class="edit-overlay" id="editOverlay" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-modal">
+    <h3>✏️ Edit Subject</h3>
+    <p class="sub">Update the subject's name and description.</p>
+    <form method="POST" id="editForm">
+      <label>Subject Name</label>
+      <input type="text" name="name" id="editName" maxlength="255" required>
+      <label>Description</label>
+      <textarea name="description" id="editDesc" rows="3" placeholder="Optional short description"></textarea>
+      <div class="edit-actions">
+        <button type="submit" class="save">Save Changes</button>
+        <button type="button" class="cancel" onclick="closeEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEdit(id, name, desc) {
+  document.getElementById('editForm').action = '/admin/subject/' + id + '/edit';
+  document.getElementById('editName').value = name;
+  document.getElementById('editDesc').value = desc || '';
+  document.getElementById('editOverlay').classList.add('open');
+  setTimeout(function () { document.getElementById('editName').focus(); }, 50);
+}
+function closeEdit() { document.getElementById('editOverlay').classList.remove('open'); }
+document.querySelectorAll('.edit-pencil').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    openEdit(btn.dataset.id, btn.dataset.name, btn.dataset.desc);
+  });
+});
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeEdit(); });
+</script>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% set active_page = 'upload' %}
+
+{% block title %}Upload Syllabus — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+.main { max-width: 680px; }
+.page-sub { font-size: 13px; color: var(--muted2); margin-top: 2px; margin-bottom: 32px; }
+.warn-box {
+  background: rgba(251,191,36,0.06);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: 12px;
+  padding: 16px;
+  color: var(--amber);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+.warn-box a { color: var(--cyan); }
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  background: rgba(255,140,90,0.1);
+  color: var(--violet);
+  border: 1px solid rgba(255,140,90,0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  margin-bottom: 8px;
+}
+.field textarea { font-family: 'Courier New', monospace; font-size: 13px; }
+.btn-row { display: flex; gap: 10px; margin-top: 8px; }
+
+/* ── Custom animated subject dropdown ── */
+.dd { position: relative; }
+.dd-trigger {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; background: var(--surface);
+  border: 1px solid var(--border2); border-radius: 10px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+  cursor: pointer; text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.dd-trigger:hover { border-color: var(--orange-light); }
+.dd.open .dd-trigger { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,107,53,0.12); background: var(--surface2); }
+.dd-ic {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(255,107,53,0.12); border: 1px solid rgba(255,107,53,0.22);
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.dd-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dd-label.placeholder { color: var(--muted); }
+.dd-arrow { color: var(--muted2); font-size: 16px; flex-shrink: 0; transition: transform 0.25s ease, color 0.2s; }
+.dd.open .dd-arrow { transform: rotate(180deg); color: var(--orange); }
+
+.dd-panel {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50;
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 12px;
+  padding: 6px; box-shadow: 0 14px 34px rgba(0,0,0,0.55);
+  max-height: 260px; overflow-y: auto;
+  opacity: 0; transform: translateY(-8px) scale(0.98); transform-origin: top center; pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.dd.open .dd-panel { opacity: 1; transform: none; pointer-events: auto; }
+.dd-panel::-webkit-scrollbar { width: 5px; }
+.dd-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.dd-opt {
+  display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 9px;
+  cursor: pointer; color: var(--muted2); font-size: 14px; outline: none;
+  transition: background 0.15s, color 0.15s;
+}
+.dd-opt:hover, .dd-opt.active { background: rgba(255,107,53,0.1); color: var(--text); }
+.dd-opt.selected { color: var(--text); }
+.dd-opt-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dd-check { color: var(--orange); font-weight: 700; opacity: 0; flex-shrink: 0; }
+.dd-opt.selected .dd-check { opacity: 1; }
+
+
+/* Loading overlay */
+#loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6,8,16,0.85);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+#loading-overlay.show { display: flex; }
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border2);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-overlay p { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--cyan); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'floating_progress.html' %}
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>🤖 Generating 1500 adaptive questions with AI...</p>
+  <p style="font-size:12px;color:var(--muted);">Running 10 batches in parallel — this usually takes a couple of minutes.</p>
+</div>
+
+<h2 style="font-family:'Inter', sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Upload Syllabus</h2>
+<p class="page-sub">Paste your syllabus and let the AI generate adaptive quiz questions automatically.</p>
+
+{% if not subjects %}
+<div class="warn-box">⚠️ No subjects found. <a href="/admin/subject/create">Create a subject first →</a></div>
+{% else %}
+<form method="POST" id="syllabusForm">
+  <div class="field">
+    <label>Select Subject</label>
+    <!-- Real select kept in DOM (hidden) so subject_id submits & loadSyllabus() fires -->
+    <select name="subject_id" id="subjectSelect" onchange="loadSyllabus()" style="display:none">
+      <option value="">— Choose a Subject —</option>
+      {% for s in subjects %}
+        <option value="{{ s.id }}" {% if selected_subject and selected_subject.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+    <!-- Custom animated dropdown -->
+    <div class="dd" id="subjectDD">
+      <button type="button" class="dd-trigger" id="ddTrigger" aria-haspopup="listbox" aria-expanded="false">
+        <span class="dd-ic">📘</span>
+        <span class="dd-label placeholder" id="ddLabel">— Choose a Subject —</span>
+        <span class="dd-arrow">⌄</span>
+      </button>
+      <div class="dd-panel" id="ddPanel" role="listbox">
+        {% for s in subjects %}
+        <div class="dd-opt" role="option" data-value="{{ s.id }}" tabindex="0">
+          <span class="dd-ic">📘</span>
+          <span class="dd-opt-name">{{ s.name }}</span>
+          <span class="dd-check">✓</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Syllabus Text</label>
+    <div class="ai-badge">✨ Powered by NVIDIA AI</div>
+    <textarea name="syllabus_text" id="syllabusText" rows="14"
+      placeholder="Unit 1: OSI Model and TCP/IP&#10;Unit 2: IP Addressing and Subnetting&#10;Unit 3: Routing Protocols&#10;Unit 4: Network Services (DNS, DHCP)&#10;Unit 5: Security Fundamentals"
+      required>{% if selected_subject and selected_subject.syllabus_text %}{{ selected_subject.syllabus_text }}{% endif %}</textarea>
+    {% if selected_subject and selected_subject.syllabus_text %}
+    <small style="color:var(--emerald);">✅ Previous syllabus loaded.</small>
+    {% endif %}
+  </div>
+  <div class="btn-row">
+    <button type="submit" class="btn btn-p" id="generateBtn">🤖 Generate Questions</button>
+    <a href="/admin/dashboard" class="btn btn-g">← Back</a>
+  </div>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const syllabusData = { {% for s in subjects %}"{{ s.id }}": {{ (s.syllabus_text or '') | tojson }}{{ ',' if not loop.last }}{% endfor %} };
+
+function loadSyllabus() {
+  const id = document.getElementById('subjectSelect').value;
+  document.getElementById('syllabusText').value = syllabusData[id] || '';
+}
+
+// ── Custom animated dropdown controller ──
+(function () {
+  const dd = document.getElementById('subjectDD');
+  if (!dd) return;
+  const trigger = document.getElementById('ddTrigger');
+  const panel   = document.getElementById('ddPanel');
+  const label   = document.getElementById('ddLabel');
+  const sel     = document.getElementById('subjectSelect');
+  const opts    = Array.from(panel.querySelectorAll('.dd-opt'));
+
+  const open  = () => { dd.classList.add('open');  trigger.setAttribute('aria-expanded', 'true');  };
+  const close = () => { dd.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); };
+
+  function choose(opt) {
+    sel.value = opt.getAttribute('data-value');
+    label.textContent = opt.querySelector('.dd-opt-name').textContent;
+    label.classList.remove('placeholder');
+    opts.forEach(o => o.classList.toggle('selected', o === opt));
+    sel.dispatchEvent(new Event('change'));   // triggers loadSyllabus()
+    close();
+    trigger.focus();
+  }
+
+  trigger.addEventListener('click', e => { e.stopPropagation(); dd.classList.contains('open') ? close() : open(); });
+  trigger.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault(); open();
+      (opts.find(o => o.classList.contains('selected')) || opts[0])?.focus();
+    }
+  });
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => choose(opt));
+    opt.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(opt); } });
+  });
+  panel.addEventListener('keydown', e => {
+    const i = opts.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); (opts[i + 1] || opts[0]).focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); (opts[i - 1] || opts[opts.length - 1]).focus(); }
+  });
+
+  document.addEventListener('click',  e => { if (!dd.contains(e.target)) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  // Reflect any pre-selected subject (e.g. editing existing syllabus)
+  if (sel.value) {
+    const pre = opts.find(o => o.getAttribute('data-value') === sel.value);
+    if (pre) { label.textContent = pre.querySelector('.dd-opt-name').textContent; label.classList.remove('placeholder'); pre.classList.add('selected'); }
+  }
+})();
+
+document.getElementById('syllabusForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const subjectId    = document.getElementById('subjectSelect').value;
+  const syllabusText = document.getElementById('syllabusText').value;
+  const generateBtn  = document.getElementById('generateBtn');
+
+  if (!subjectId || !syllabusText.trim()) {
+    showToast('Please select a subject and paste syllabus text.', 'warning');
+    return;
+  }
+
+  generateBtn.disabled = true;
+  generateBtn.style.opacity = '0.5';
+  generateBtn.style.cursor = 'not-allowed';
+  window.floatingProgress.start(600);
+  if (window.realTimeProgress) window.realTimeProgress.startPolling(2000);
+
+  try {
+    const formData = new FormData(document.getElementById('syllabusForm'));
+    const response = await fetch(window.location.href, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'text/html' }
+    });
+    const result = await response.json();
+
+    if (response.ok && result.success && result.started) {
+      // Generation now runs in the background — poll progress until it finishes,
+      // so a multi-minute request is never held open (the old cause of "crashes").
+      const sid = result.subject_id || subjectId;
+      const poll = setInterval(async () => {
+        try {
+          const pr = await fetch('/admin/api/generation-progress');
+          const pd = await pr.json();
+          if (pd.status === 'complete') {
+            clearInterval(poll);
+            if (window.realTimeProgress) window.realTimeProgress.stopPolling();
+            window.floatingProgress.completeGeneration();
+            setTimeout(() => { window.location.href = '/admin/questions?subject_id=' + (pd.current_subject_id || sid); }, 1500);
+          } else if (pd.status === 'error') {
+            clearInterval(poll);
+            if (window.realTimeProgress) window.realTimeProgress.stopPolling();
+            window.floatingProgress.hide();
+            showToast('Generation failed: ' + (pd.error_message || 'unknown error'), 'danger');
+            generateBtn.disabled = false; generateBtn.style.opacity = '1'; generateBtn.style.cursor = 'pointer';
+          }
+        } catch (_) { /* transient network blip — keep polling */ }
+      }, 2500);
+    } else {
+      if (window.realTimeProgress) window.realTimeProgress.stopPolling();
+      window.floatingProgress.hide();
+      showToast('Error: ' + (result.message || 'Failed to start generation'), 'danger');
+      generateBtn.disabled = false;
+      generateBtn.style.opacity = '1';
+      generateBtn.style.cursor = 'pointer';
+    }
+  } catch (error) {
+    if (window.realTimeProgress) window.realTimeProgress.stopPolling();
+    window.floatingProgress.hide();
+    showToast('Network error: ' + error.message, 'danger');
+    generateBtn.disabled = false;
+    generateBtn.style.opacity = '1';
+    generateBtn.style.cursor = 'pointer';
+  }
+});
+
+{% if selected_subject %}document.addEventListener('DOMContentLoaded', loadSyllabus);{% endif %}
+</script>
+{% endblock %}

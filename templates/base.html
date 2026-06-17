@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{% block title %}EduBot Admin{% endblock %}</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+{% block styles %}{% endblock %}
+<script>(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')})()</script>
+</head>
+<body>
+
+<!-- Nav progress bar -->
+<div id="nav-bar"></div>
+
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- Hamburger button (mobile) -->
+<button class="hamburger" id="hamburger" onclick="openSidebar()" aria-label="Open navigation">☰</button>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+  <div class="sb-brand">
+    <div class="sb-icon" aria-hidden="true">🎓</div>
+    <h1>EduBot</h1>
+  </div>
+  <div class="sb-nav">
+    <a href="/admin/dashboard" class="nav-item{% if active_page == 'dashboard' %} active{% endif %}"{% if active_page == 'dashboard' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">📊</span> Dashboard
+    </a>
+    <a href="/admin/students" class="nav-item{% if active_page == 'students' %} active{% endif %}"{% if active_page == 'students' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">👥</span> Students
+    </a>
+    <a href="/admin/subject/create" class="nav-item{% if active_page == 'create_subject' %} active{% endif %}"{% if active_page == 'create_subject' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">➕</span> New Subject
+    </a>
+    <a href="/admin/upload" class="nav-item{% if active_page == 'upload' %} active{% endif %}"{% if active_page == 'upload' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">📤</span> Upload Syllabus
+    </a>
+    <a href="/admin/questions" class="nav-item{% if active_page == 'questions' %} active{% endif %}"{% if active_page == 'questions' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">📝</span> Questions
+    </a>
+    <a href="/admin/reports" class="nav-item{% if active_page == 'reports' %} active{% endif %}"{% if active_page == 'reports' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">📋</span> Reports
+    </a>
+    <a href="/admin/issues" class="nav-item{% if active_page == 'issues' %} active{% endif %}"{% if active_page == 'issues' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">🛎️</span> Issues
+      {% if pending_issue_count %}
+      <span class="nav-badge">{{ pending_issue_count }}</span>
+      {% endif %}
+    </a>
+    <a href="/admin/reset-password" class="nav-item{% if active_page == 'reset_password' %} active{% endif %}"{% if active_page == 'reset_password' %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">🔐</span> Reset Password
+    </a>
+  </div>
+  <div class="sb-footer">
+    <a href="/auth/logout" class="logout-btn" aria-label="Log out">
+      <span aria-hidden="true">🚪</span> Logout
+    </a>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark theme">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Main content -->
+<main class="main" role="main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ '✅' if cat == 'success' else '⚠️' }} {{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Toast container -->
+<div id="toast-container" aria-live="polite"></div>
+
+<script>
+/* ── Sidebar toggle (mobile) ── */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', 'true');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+/* ── Theme toggle ── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  if (isLight) {
+    html.removeAttribute('data-theme');
+    localStorage.removeItem('theme');
+    document.getElementById('theme-icon').textContent = '🌙';
+  } else {
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+    document.getElementById('theme-icon').textContent = '☀️';
+  }
+}
+(function() {
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? '☀️' : '🌙';
+})();
+
+/* ── Nav progress bar ── */
+const _nb = document.getElementById('nav-bar');
+let _nbTimer = null;
+function _nbStart() {
+  if (!_nb) return;
+  clearTimeout(_nbTimer);
+  _nb.style.width = '0';
+  _nb.style.opacity = '1';
+  _nb.style.transition = 'none';
+  _nb.className = '';
+  void _nb.offsetWidth;
+  _nb.className = 'nb-pending';
+}
+function _nbDone() {
+  if (!_nb) return;
+  _nb.className = 'nb-done';
+  _nbTimer = setTimeout(() => {
+    _nb.style.transition = 'opacity 0.3s ease';
+    _nb.style.opacity = '0';
+    setTimeout(() => { _nb.className = ''; _nb.style.width = '0'; _nb.style.opacity = ''; _nb.style.transition = ''; }, 320);
+  }, 180);
+}
+document.querySelectorAll('a.nav-item').forEach(a => {
+  a.addEventListener('click', e => {
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && a.href && !a.href.includes('#')) _nbStart();
+  });
+});
+_nbStart();
+window.addEventListener('load', _nbDone);
+
+/* ── Toast notifications ── */
+function showToast(message, type = 'info', duration = 3500) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  const icons = { success: '✅', danger: '⚠️', info: 'ℹ️', warning: '⚠️' };
+  toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('removing');
+    toast.addEventListener('animationend', () => toast.remove());
+  }, duration);
+}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduBot — Your Certificate</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+:root{--orange:#ff6b35;--orange-light:#ff8c5a;--amber:#fbbf24;--white:#fff;--muted:#94a3b8;--muted2:#64748b;--border2:#444;--surface2:#222;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter', sans-serif;background:#070707;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;}
+.cert-card{width:720px;max-width:94vw;border-radius:18px;padding:2.5px;background:linear-gradient(135deg,var(--orange),var(--amber),var(--orange-light));box-shadow:0 24px 70px rgba(0,0,0,0.6),0 0 60px rgba(255,107,53,0.18);}
+.cert-frame{border-radius:16px;padding:42px 46px 34px;background:radial-gradient(120% 90% at 50% 0%,rgba(255,107,53,0.10),transparent 55%),#0c0c0d;}
+.cert-top{display:flex;align-items:center;justify-content:space-between;}
+.cert-brand{display:flex;align-items:center;gap:11px;}
+.cert-brand-ic{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;color:#0a0a0a;}
+.cert-brand-ic svg{width:22px;height:22px;}
+.cert-brand span{font-size:18px;font-weight:700;color:#fff;letter-spacing:0.5px;}
+.cert-kicker{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--orange);}
+.cert-rule{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:22px 0 26px;}
+.cert-body{text-align:center;}
+.cert-tier{font-size:13px;font-weight:700;letter-spacing:4px;color:var(--amber);text-transform:uppercase;margin-bottom:18px;}
+.cert-sub{font-size:13px;color:var(--muted);margin-bottom:10px;}
+.cert-name{font-size:44px;font-weight:700;color:#fff;letter-spacing:2px;line-height:1.1;margin-bottom:14px;text-transform:uppercase;text-shadow:0 2px 30px rgba(255,107,53,0.3);}
+.cert-desc{font-size:13.5px;line-height:1.6;color:var(--muted2);max-width:480px;margin:0 auto 22px;}
+.cert-desc b{color:#fff;font-weight:600;}
+.cert-score{display:inline-block;font-size:20px;font-weight:700;color:var(--orange);background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.25);padding:8px 22px;border-radius:30px;}
+.cert-foot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:32px;}
+.cert-seal{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--amber));display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(255,107,53,0.35);}
+.cert-seal-in{width:60px;height:60px;border-radius:50%;background:#0c0c0d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.cert-seal-in .star{font-size:19px;color:var(--amber);line-height:1;}
+.cert-seal-in .lbl{font-size:7px;font-weight:700;letter-spacing:1.5px;color:var(--muted2);}
+.cert-meta{text-align:right;}
+.cert-date{font-size:14px;font-weight:600;color:#fff;}
+.cert-meta .lbl2{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.cert-id{font-size:11px;color:var(--muted2);font-family:monospace;margin-top:8px;letter-spacing:0.5px;}
+.dlbtn{padding:13px 28px;border-radius:11px;border:none;background:var(--orange);color:#0a0a0a;font-family:'Inter', sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.dlbtn:active{transform:translateY(1px);}
+.hint{color:var(--muted2);font-size:12px;text-align:center;max-width:420px;}
+@media(max-width:600px){.cert-name{font-size:30px;}.cert-frame{padding:30px 22px;}}
+h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Playfair Display',serif !important;}
+</style>
+</head>
+<body>
+  <div class="cert-card" id="cert-card">
+    <div class="cert-frame">
+      <div class="cert-top">
+        <div class="cert-brand">
+          <div class="cert-brand-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="2.4" r="1.2" fill="currentColor" stroke="none"/>
+              <line x1="12" y1="5" x2="12" y2="3.4"/>
+              <rect x="4" y="5" width="16" height="13" rx="4"/>
+              <circle cx="9.2" cy="11" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="14.8" cy="11" r="1.5" fill="currentColor" stroke="none"/>
+              <line x1="9.5" y1="15" x2="14.5" y2="15"/>
+            </svg>
+          </div>
+          <span>EduBot</span>
+        </div>
+        <div class="cert-kicker">CERTIFICATE</div>
+      </div>
+      <div class="cert-rule"></div>
+      <div class="cert-body">
+        <div class="cert-tier" id="c-tier">Certificate of Achievement</div>
+        <div class="cert-sub">This certifies that</div>
+        <div class="cert-name" id="c-name">Student</div>
+        <div class="cert-desc" id="c-desc"></div>
+        <div class="cert-score" id="c-score">FINAL SCORE: 0%</div>
+      </div>
+      <div class="cert-foot">
+        <div class="cert-seal"><div class="cert-seal-in"><div class="star">★</div><div class="lbl">EDUBOT</div></div></div>
+        <div class="cert-meta">
+          <div class="cert-date" id="c-date"></div>
+          <div class="lbl2">Date Issued</div>
+          <div class="cert-id" id="c-id"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="dlbtn" onclick="dl()">⬇ Download Certificate</button>
+  <p class="hint" id="hint">Preparing your download…</p>
+
+<script>
+const q = new URLSearchParams(location.search);
+function tierFor(p){
+  if (p >= 90) return ['Certificate of Distinction', 'with outstanding mastery'];
+  if (p >= 70) return ['Certificate of Proficiency', 'demonstrating strong proficiency'];
+  if (p >= 50) return ['Certificate of Achievement', 'demonstrating solid understanding'];
+  return ['Certificate of Participation', 'completing the full adaptive quiz'];
+}
+const name    = q.get('name') || 'Student';
+const subject = q.get('subject') || 'EduBot';
+const correct = parseInt(q.get('correct') || '0', 10);
+const total   = parseInt(q.get('total') || '0', 10);
+const pct     = parseInt(q.get('pct') || '0', 10);
+const cid     = q.get('cid') || '';
+const date    = q.get('date') || new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+const [tier, desc] = tierFor(pct);
+
+// textContent everywhere (no innerHTML) to avoid reflected-XSS from query params
+document.getElementById('c-tier').textContent  = tier;
+document.getElementById('c-name').textContent  = name;
+document.getElementById('c-score').textContent = 'FINAL SCORE: ' + pct + '% (' + correct + '/' + total + ')';
+document.getElementById('c-date').textContent  = date;
+document.getElementById('c-id').textContent    = cid ? 'ID: ' + cid : '';
+const d = document.getElementById('c-desc');
+d.textContent = 'has successfully completed the ';
+const b = document.createElement('b'); b.textContent = subject; d.appendChild(b);
+d.appendChild(document.createTextNode(' adaptive quiz, ' + desc + '.'));
+
+let done = false;
+function dl(){
+  if (typeof htmlToImage === 'undefined'){ document.getElementById('hint').textContent = 'Renderer loading — tap the button in a moment.'; return; }
+  htmlToImage.toPng(document.getElementById('cert-card'), { pixelRatio: 2, cacheBust: true }).then(dataUrl => {
+    const a = document.createElement('a');
+    a.download = 'EduBot_Certificate.png';
+    a.href = dataUrl;
+    a.click();
+    done = true;
+    document.getElementById('hint').textContent = 'Done! If the download didn’t start, tap “Download Certificate” or long-press the certificate to save it.';
+  }).catch(() => { document.getElementById('hint').textContent = 'Tap “Download Certificate” to save your certificate.'; });
+}
+// Auto-download once fonts are ready (some mobile browsers may still require a tap).
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(() => { if (!done) dl(); }, 500));
+</script>
+</body>
+</html>

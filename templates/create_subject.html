@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% set active_page = 'create_subject' %}
+
+{% block title %}Create Subject — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+.main { max-width: 600px; }
+.page-sub { font-size: 13px; color: var(--muted2); margin-top: 2px; margin-bottom: 28px; }
+.btn-row { display: flex; gap: 10px; margin-top: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="font-family:'Inter', sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Create New Subject</h2>
+<p class="page-sub">Add a subject for students to take adaptive quizzes on.</p>
+
+<form method="POST" action="/admin/subject/create">
+  <div class="field">
+    <label>Subject Name <span style="color:var(--red)">*</span></label>
+    <input type="text" name="name" placeholder="e.g. Computer Networks" required autofocus />
+    <small>Use a clear, concise name that students will recognise.</small>
+  </div>
+  <div class="field">
+    <label>Description <span style="color:var(--muted)">(Optional)</span></label>
+    <textarea name="description" rows="5" placeholder="Describe what this subject covers...&#10;&#10;Example:&#10;Covers Computer Networks fundamentals including OSI model, TCP/IP, routing protocols and network security."></textarea>
+  </div>
+  <div class="btn-row">
+    <button type="submit" class="btn btn-p">✅ Create Subject</button>
+    <a href="/admin/subjects" class="btn btn-g">← Back to Subjects</a>
+  </div>
+</form>
+{% endblock %}

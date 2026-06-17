@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% set active_page = 'reports' %}
+
+{% block title %}Reports — EduBot Admin{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Filter bar ── */
+.filter-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--cyan); }
+.search-input::placeholder { color: var(--muted); }
+.filter-select {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select option { background: var(--surface2); }
+
+/* ── Student group card ── */
+.student-group { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 16px; transition: border-color 0.2s; }
+.student-group:hover { border-color: var(--border2); }
+.sg-header { display: flex; align-items: center; gap: 14px; padding: 18px 20px; cursor: pointer; transition: background 0.2s; }
+.sg-header:hover { background: rgba(255,255,255,0.02); }
+.sg-av {
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,140,90,0.15));
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.sg-info { flex: 1; }
+.sg-info h4 { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.sg-info p  { font-size: 12px; color: var(--muted); }
+.sg-right   { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.attempt-badge {
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255,107,53,0.1);
+  color: var(--cyan);
+  border: 1px solid rgba(255,107,53,0.2);
+}
+.sg-chevron { font-size: 14px; color: var(--muted); transition: transform 0.3s; }
+.sg-header.open .sg-chevron { transform: rotate(180deg); }
+
+/* ── Attempts list ── */
+.attempts-list { display: none; border-top: 1px solid var(--border); }
+.attempts-list.open { display: block; }
+.attempt-item { padding: 16px 20px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; }
+.attempt-item:last-child { border-bottom: none; }
+.attempt-num {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--muted2);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.attempt-detail .a-subj { font-size: 12px; color: var(--cyan); font-family: 'Inter', sans-serif; font-weight: 600; margin-bottom: 6px; }
+.attempt-detail .a-date { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.topics-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+.ttag { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-family: 'Inter', sans-serif; font-weight: 600; }
+.ttag.w    { background: rgba(251,191,36,0.1);   color: var(--amber);   border: 1px solid rgba(251,191,36,0.2); }
+.ttag.s,
+.ttag.none { background: rgba(52,211,153,0.08);  color: var(--emerald); border: 1px solid rgba(52,211,153,0.2); }
+.attempt-score { text-align: right; flex-shrink: 0; }
+.score-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 0 4px auto; }
+.score-circle .sn { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; }
+.score-circle .sl { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.score-hi  { background: rgba(52,211,153,0.1);  border: 2px solid rgba(52,211,153,0.25); }
+.score-hi  .sn { color: var(--emerald); }
+.score-mid { background: rgba(251,191,36,0.08); border: 2px solid rgba(251,191,36,0.2); }
+.score-mid .sn { color: var(--amber); }
+.score-lo  { background: rgba(248,113,113,0.08); border: 2px solid rgba(248,113,113,0.2); }
+.score-lo  .sn { color: var(--red); }
+.correct-wrong { font-size: 11px; color: var(--muted); text-align: right; }
+
+/* ── Pagination ── */
+.pagination { display: flex; align-items: center; gap: 6px; margin-top: 20px; flex-wrap: wrap; }
+.pg-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 10px;
+  border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+  border: 1px solid var(--border2); background: var(--surface2); color: var(--muted2);
+  cursor: pointer; transition: all 0.15s;
+}
+.pg-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.pg-btn.active { background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #0a0a0a; border-color: transparent; }
+.pg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.pg-info { font-size: 12px; color: var(--muted2); margin-left: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <h2>Student Reports</h2>
+    <p>Detailed performance — grouped by student with per-attempt breakdown</p>
+  </div>
+</div>
+
+{% if grouped_reports %}
+<div class="filter-bar">
+  <input class="search-input" id="search" placeholder="🔍 Search student name or email..." oninput="filterStudents()" aria-label="Search students" />
+  <select class="filter-select" id="subj-filter" onchange="filterStudents()" aria-label="Filter by subject">
+    <option value="">All Subjects</option>
+    {% for subj in all_subjects %}
+    <option value="{{ subj }}">{{ subj }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div id="students-list">
+  {% for student_email, data in grouped_reports.items() %}
+  <div class="student-group" data-name="{{ data.name|lower }}" data-email="{{ student_email|lower }}" data-subjects="{{ data.subjects|join(' ')|lower }}">
+    <div class="sg-header" onclick="toggleAttempts(this)">
+      <div class="sg-av" aria-hidden="true">👤</div>
+      <div class="sg-info">
+        <h4>{{ data.name }}</h4>
+        <p>{{ student_email }}</p>
+      </div>
+      <div class="sg-right">
+        <span class="attempt-badge">{{ data.attempts|length }} attempt{{ 's' if data.attempts|length > 1 else '' }}</span>
+        <span class="sg-chevron" aria-hidden="true">▾</span>
+      </div>
+    </div>
+    <div class="attempts-list {% if data.attempts|length == 1 %}open{% endif %}">
+      {% for attempt in data.attempts %}
+      {% set correct = attempt.correct_count %}
+      {% set wrong   = attempt.wrong_count %}
+      {% set total   = correct + wrong %}
+      {% set pct     = ((correct / total * 100) | int) if total > 0 else 0 %}
+      <div class="attempt-item">
+        <div class="attempt-num">#{{ loop.index }}</div>
+        <div class="attempt-detail">
+          <div class="a-subj">{{ attempt.subject }}</div>
+          <div class="a-date">📅 {{ attempt.completed_at | format_time_long if attempt.completed_at else 'In Progress' }}</div>
+          <div class="topics-wrap">
+            {% if attempt.weak_topics %}
+              {% for t in attempt.weak_topics %}<span class="ttag w">⚠️ {{ t }}</span>{% endfor %}
+            {% else %}
+              <span class="ttag none">✅ All topics strong</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="attempt-score">
+          <div class="score-circle {% if pct >= 70 %}score-hi{% elif pct >= 40 %}score-mid{% else %}score-lo{% endif %}">
+            <div class="sn">{{ pct }}%</div>
+            <div class="sl">Score</div>
+          </div>
+          <div class="correct-wrong">{{ correct }}✅ / {{ wrong }}❌</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="pagination" id="pagination"></div>
+
+{% else %}
+<div class="empty">
+  <div class="ei">📋</div>
+  <p>No completed sessions yet.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PAGE_SIZE = 15;
+let currentPage = 1;
+
+function toggleAttempts(header) {
+  const list   = header.nextElementSibling;
+  const isOpen = list.classList.contains('open');
+  header.classList.toggle('open', !isOpen);
+  list.classList.toggle('open', !isOpen);
+}
+
+function getFilteredGroups() {
+  const q    = (document.getElementById('search')      || {}).value || '';
+  const subj = (document.getElementById('subj-filter') || {}).value || '';
+  const search = q.trim().toLowerCase();
+  const subjLower = subj.toLowerCase();
+  return [...document.querySelectorAll('.student-group')].filter(g => {
+    const name     = g.dataset.name     || '';
+    const email    = g.dataset.email    || '';
+    const subjects = g.dataset.subjects || '';
+    const matchQ = !search   || name.includes(search) || email.includes(search);
+    const matchS = !subjLower || subjects.includes(subjLower);
+    return matchQ && matchS;
+  });
+}
+
+function renderPage() {
+  const filtered = getFilteredGroups();
+  const total    = filtered.length;
+  const pages    = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  currentPage    = Math.min(currentPage, pages);
+  const start    = (currentPage - 1) * PAGE_SIZE;
+  const end      = start + PAGE_SIZE;
+
+  document.querySelectorAll('.student-group').forEach(g => g.style.display = 'none');
+  filtered.slice(start, end).forEach(g => g.style.display = '');
+
+  // Pagination controls
+  const pg = document.getElementById('pagination');
+  if (!pg) return;
+  if (pages <= 1) { pg.innerHTML = ''; return; }
+
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>←</button>`;
+  pageBtns(currentPage, pages).forEach(p => {
+    if (p === '…') html += `<span class="pg-btn" style="cursor:default;pointer-events:none">…</span>`;
+    else html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  html += `<button class="pg-btn" onclick="goPage(${currentPage + 1})" ${currentPage === pages ? 'disabled' : ''}>→</button>`;
+  html += `<span class="pg-info">Page ${currentPage} of ${pages} · ${total} students</span>`;
+  pg.innerHTML = html;
+}
+
+function pageBtns(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, '…', total];
+  if (current >= total - 3) return [1, '…', total-4, total-3, total-2, total-1, total];
+  return [1, '…', current-1, current, current+1, '…', total];
+}
+
+function goPage(page) {
+  currentPage = page;
+  renderPage();
+  document.getElementById('students-list')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function filterStudents() {
+  currentPage = 1;
+  renderPage();
+}
+
+// Auto-expand single-attempt students
+document.querySelectorAll('.student-group').forEach(g => {
+  const badge = g.querySelector('.attempt-badge');
+  if (badge && badge.textContent.includes('1 attempt')) {
+    g.querySelector('.sg-header').classList.add('open');
+  }
+});
+
+renderPage();
+</script>
+{% endblock %}

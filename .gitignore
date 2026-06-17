@@ -1,0 +1,32 @@
+# ── Secrets & local config ───────────────────────────────
+.env
+*.env
+!.env.example
+
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ── Virtual environments ──────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Databases & backups (may contain student data) ────────
+*.db
+*.sqlite3
+instance/
+*.sql
+
+# ── Logs ──────────────────────────────────────────────────
+*.log
+
+# ── Work / tooling state ──────────────────────────────────
+.theme_backup/
+.claude/
+
+# ── OS / editor ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
