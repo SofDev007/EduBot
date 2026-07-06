@@ -71,7 +71,7 @@
   margin-left: auto;
   background: var(--red);
   color: #fff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   padding: 1px 7px;
@@ -92,7 +92,7 @@
 
 .nav-sub-item {
   padding-left: 30px !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   border-radius: 8px !important;
 }
 
@@ -111,7 +111,7 @@
   align-items: center;
   gap: 8px;
   color: var(--red);
-  font-size: 13px;
+  font-size: 14px;
   text-decoration: none;
   padding: 8px 12px;
   border-radius: 8px;
@@ -191,7 +191,7 @@
   background: var(--surface2);
   border: 1px solid var(--border2);
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   padding: 4px 10px;
   border-radius: 6px;
   white-space: nowrap;

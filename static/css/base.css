@@ -74,13 +74,13 @@ body.sidebar-collapsed .main { margin-left: 64px; }
   font-size: 22px;
   font-weight: 800;
 }
-.page-hdr p { font-size: 13px; color: var(--muted2); margin-top: 2px; }
+.page-hdr p { font-size: 14px; color: var(--muted2); margin-top: 2px; }
 
 /* ─── Flash messages ─────────────────────────────────────────────────────── */
 .flash {
   padding: 10px 14px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 18px;
   display: flex;
   align-items: center;
