@@ -339,6 +339,19 @@ body.state-incorrect .stripes-bg {
 .restart-btn.cert-cta{background:var(--orange);color:#0a0a0a;border-color:transparent;margin-bottom:10px;}
 .restart-btn.cert-cta:hover{background:var(--orange-light);border-color:transparent;}
 @media(max-width:600px){.cert-name{font-size:30px;}.cert-frame{padding:30px 22px;}}
+
+/* ── Bot speech bubble (quiz screen) ── */
+.bot-say{
+  position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%) translateY(-4px) scale(0.9);
+  background:var(--surface);border:1px solid var(--border2);color:var(--white);
+  font-size:12px;font-weight:600;padding:7px 13px;border-radius:10px;white-space:nowrap;
+  opacity:0;transform-origin:top center;pointer-events:none;
+  transition:opacity 0.2s ease,transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 8px 22px rgba(0,0,0,0.5);z-index:300;
+}
+.bot-say::before{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-bottom-color:var(--surface);}
+.bot-say.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
 h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Playfair Display',serif !important;}
 </style>
 </head>
@@ -425,7 +438,7 @@ h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font
 <div id="scr-chat">
   <div class="ch-header">
     <button class="back-btn" onclick="goBack()" aria-label="Back to subjects">←</button>
-    <div class="hd-ic">🤖</div>
+    <div class="hd-ic" style="position:relative;">🤖<div class="bot-say" id="bot-say"></div></div>
     <div class="hd-info">
       <h2>EduBot</h2>
       <p id="hd-subj">Adaptive Quiz</p>
@@ -515,7 +528,7 @@ const state = {
   currentQuestionId: null, currentTopic: '',
   awaitingAnswer: false, done: false,
   displayToDb: {}, dbToDisplay: {},
-  topicStats: {}, streak: 0
+  topicStats: {}, streak: 0, wrongStreak: 0
 };
 let selectedSubjectId = null;
 
@@ -541,14 +554,72 @@ function updateTopicPanel(topic) {
   $('topic-wrong').textContent   = s.wrong;
   $('topic-bar').style.width     = pct + '%';
 }
+// ─── BOT MESSAGES ────────────────────────────────────
+const BOT_WRONG_MSGS = [
+  "You can do Better!",
+  "Keep going, don't give up!",
+  "Mistakes help us learn!",
+  "Take a breath, you've got this!",
+  "Think it through!",
+  "Don't lose heart!",
+  "Stay focused, almost there!",
+  "You'll get the next one! ✨",
+];
+const BOT_CORRECT_MSGS = [
+  "Hooray!",
+  "You're on fire!",
+  "Brilliant! Keep it up!",
+  "Unstoppable!",
+  "Amazing streak! 🌟",
+  "Keep crushing it! 💥",
+  "You're a genius! ",
+  "Wow, incredible! ",
+];
+const BOT_CHEAT_MSGS = [
+  "Are You Cheating?? ",
+  "Don't Cheat! 😤",
+  "No way you're this good! ",
+  "Suspicious... 🤨",
+  "Peeking at the answers? ",
+  "I am watching you! 👀",
+  "EduBot is watching you!",
+];
+
+let _botSayTimer = null;
+function botSay(msg, duration) {
+  const el = document.getElementById('bot-say');
+  if (!el) return;
+  clearTimeout(_botSayTimer);
+  el.textContent = msg;
+  el.classList.add('show');
+  _botSayTimer = setTimeout(() => el.classList.remove('show'), duration || 2400);
+}
+
 function recordAnswer(isCorrect) {
   const topic = state.currentTopic;
   if (!state.topicStats[topic]) state.topicStats[topic] = { correct: 0, wrong: 0 };
-  if (isCorrect) { state.topicStats[topic].correct++; state.streak++; }
-  else           { state.topicStats[topic].wrong++;   state.streak = 0; }
+  if (isCorrect) {
+    state.topicStats[topic].correct++;
+    state.streak++;
+    state.wrongStreak = 0;
+  } else {
+    state.topicStats[topic].wrong++;
+    state.streak = 0;
+    state.wrongStreak++;
+  }
   updateTopicPanel(topic);
   $('streak-num').textContent = state.streak;
   $('streak-box').classList.toggle('hot', state.streak >= 3);
+
+  if (isCorrect) {
+    if (state.streak >= 5) {
+      botSay(BOT_CHEAT_MSGS[Math.floor(Math.random() * BOT_CHEAT_MSGS.length)], 2800);
+    } else if (state.streak >= 2) {
+      botSay(BOT_CORRECT_MSGS[Math.floor(Math.random() * BOT_CORRECT_MSGS.length)]);
+    }
+  } else if (state.wrongStreak >= 2) {
+    botSay(BOT_WRONG_MSGS[Math.floor(Math.random() * BOT_WRONG_MSGS.length)]);
+  }
 }
 
 // ─── CARD DECK ────────────────────────────────────────
@@ -738,7 +809,7 @@ function goBack() {
     $('btn-begin').textContent = 'Begin Adaptive Quiz →';
     selectedSubjectId = null;
     document.querySelectorAll('.sc').forEach(c => c.classList.remove('sel'));
-    Object.assign(state, { sessionId: null, qNum: 0, currentQuestionId: null, currentTopic: '', awaitingAnswer: false, done: false, displayToDb: {}, dbToDisplay: {}, topicStats: {}, streak: 0 });
+    Object.assign(state, { sessionId: null, qNum: 0, currentQuestionId: null, currentTopic: '', awaitingAnswer: false, done: false, displayToDb: {}, dbToDisplay: {}, topicStats: {}, streak: 0, wrongStreak: 0 });
     document.body.classList.remove('state-correct', 'state-incorrect');
     hidePanels();
   }

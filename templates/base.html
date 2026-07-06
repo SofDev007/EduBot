@@ -29,40 +29,46 @@
 <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
   <div class="sb-brand">
     <div class="sb-icon" aria-hidden="true">🎓</div>
-    <h1>EduBot</h1>
+    <h1 class="sb-title">EduBot</h1>
+    <button class="sb-collapse-btn" id="sb-collapse-btn" onclick="toggleSidebarCollapse()" aria-label="Collapse sidebar">
+      <span id="sb-collapse-icon">«</span>
+    </button>
   </div>
   <div class="sb-nav">
-    <a href="/admin/dashboard" class="nav-item{% if active_page == 'dashboard' %} active{% endif %}"{% if active_page == 'dashboard' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">📊</span> Dashboard
+    <a href="/admin/dashboard" class="nav-item{% if active_page == 'dashboard' %} active{% endif %}"{% if active_page == 'dashboard' %} aria-current="page"{% endif %} title="Dashboard">
+      <span class="nav-icon" aria-hidden="true">📊</span><span class="nav-label">Dashboard</span>
     </a>
-    <a href="/admin/students" class="nav-item{% if active_page == 'students' %} active{% endif %}"{% if active_page == 'students' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">👥</span> Students
+    <a href="/admin/students" class="nav-item{% if active_page == 'students' %} active{% endif %}"{% if active_page == 'students' %} aria-current="page"{% endif %} title="Students">
+      <span class="nav-icon" aria-hidden="true">👥</span><span class="nav-label">Students</span>
     </a>
-    <a href="/admin/subject/create" class="nav-item{% if active_page == 'create_subject' %} active{% endif %}"{% if active_page == 'create_subject' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">➕</span> New Subject
+    <a href="/admin/subjects" class="nav-item{% if active_page == 'subjects' %} active{% endif %}"{% if active_page == 'subjects' %} aria-current="page"{% endif %} title="Subjects">
+      <span class="nav-icon" aria-hidden="true">📚</span><span class="nav-label">Subjects</span>
     </a>
-    <a href="/admin/upload" class="nav-item{% if active_page == 'upload' %} active{% endif %}"{% if active_page == 'upload' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">📤</span> Upload Syllabus
+    <a href="/admin/subject/create" class="nav-item{% if active_page == 'create_subject' %} active{% endif %}"{% if active_page == 'create_subject' %} aria-current="page"{% endif %} title="New Subject">
+      <span class="nav-icon" aria-hidden="true">➕</span><span class="nav-label">New Subject</span>
     </a>
-    <a href="/admin/questions" class="nav-item{% if active_page == 'questions' %} active{% endif %}"{% if active_page == 'questions' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">📝</span> Questions
+    <a href="/admin/upload" class="nav-item{% if active_page == 'upload' %} active{% endif %}"{% if active_page == 'upload' %} aria-current="page"{% endif %} title="Upload Syllabus">
+      <span class="nav-icon" aria-hidden="true">📤</span><span class="nav-label">Upload Syllabus</span>
     </a>
-    <a href="/admin/reports" class="nav-item{% if active_page == 'reports' %} active{% endif %}"{% if active_page == 'reports' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">📋</span> Reports
+    <a href="/admin/questions" class="nav-item{% if active_page == 'questions' %} active{% endif %}"{% if active_page == 'questions' %} aria-current="page"{% endif %} title="Questions">
+      <span class="nav-icon" aria-hidden="true">📝</span><span class="nav-label">Questions</span>
     </a>
-    <a href="/admin/issues" class="nav-item{% if active_page == 'issues' %} active{% endif %}"{% if active_page == 'issues' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">🛎️</span> Issues
+    <a href="/admin/reports" class="nav-item{% if active_page == 'reports' %} active{% endif %}"{% if active_page == 'reports' %} aria-current="page"{% endif %} title="Reports">
+      <span class="nav-icon" aria-hidden="true">📋</span><span class="nav-label">Reports</span>
+    </a>
+    <a href="/admin/issues" class="nav-item{% if active_page == 'issues' %} active{% endif %}"{% if active_page == 'issues' %} aria-current="page"{% endif %} title="Issues">
+      <span class="nav-icon" aria-hidden="true">🛎️</span><span class="nav-label">Issues</span>
       {% if pending_issue_count %}
       <span class="nav-badge">{{ pending_issue_count }}</span>
       {% endif %}
     </a>
-    <a href="/admin/reset-password" class="nav-item{% if active_page == 'reset_password' %} active{% endif %}"{% if active_page == 'reset_password' %} aria-current="page"{% endif %}>
-      <span aria-hidden="true">🔐</span> Reset Password
+    <a href="/admin/reset-password" class="nav-item{% if active_page == 'reset_password' %} active{% endif %}"{% if active_page == 'reset_password' %} aria-current="page"{% endif %} title="Reset Password">
+      <span class="nav-icon" aria-hidden="true">🔐</span><span class="nav-label">Reset Password</span>
     </a>
   </div>
   <div class="sb-footer">
-    <a href="/auth/logout" class="logout-btn" aria-label="Log out">
-      <span aria-hidden="true">🚪</span> Logout
+    <a href="/auth/logout" class="logout-btn" aria-label="Log out" title="Logout">
+      <span class="nav-icon" aria-hidden="true">🚪</span><span class="nav-label">Logout</span>
     </a>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark theme">
       <span id="theme-icon">🌙</span>
@@ -97,6 +103,24 @@ function closeSidebar() {
   document.getElementById('hamburger').setAttribute('aria-expanded', 'false');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+/* ── Sidebar collapse (desktop) ── */
+function toggleSidebarCollapse() {
+  const sidebar = document.getElementById('sidebar');
+  const icon = document.getElementById('sb-collapse-icon');
+  const collapsed = sidebar.classList.toggle('collapsed');
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  icon.textContent = collapsed ? '»' : '«';
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+}
+(function() {
+  if (localStorage.getItem('sidebarCollapsed') === '1') {
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.body.classList.add('sidebar-collapsed');
+    const icon = document.getElementById('sb-collapse-icon');
+    if (icon) icon.textContent = '»';
+  }
+})();
 
 /* ── Theme toggle ── */
 function toggleTheme() {

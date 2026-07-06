@@ -97,10 +97,20 @@ def create_app():
 
     # Ensure any newly added tables exist (e.g. password_reset_requests).
     # create_all() only creates MISSING tables, so existing data is untouched.
-try:
-    db.create_all()
+    with app.app_context():
+        import sys, traceback as _tb
+        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+        db_kind = 'PostgreSQL' if db_uri.startswith('postgresql') else ('MySQL' if db_uri.startswith('mysql') else 'SQLite')
+        sys.stderr.write(f"[DB] Connecting to: {db_kind}\n")
+        sys.stderr.flush()
+        try:
+            db.create_all()
+            sys.stderr.write("[DB] create_all OK\n")
+            sys.stderr.flush()
         except Exception as e:
-            import sys, traceback; sys.stderr.write(f"[DB] FAILED: {e}\n"); traceback.print_exc(file=sys.stderr); sys.stderr.flush()
+            sys.stderr.write(f"[DB] create_all FAILED: {e}\n")
+            _tb.print_exc(file=sys.stderr)
+            sys.stderr.flush()
 
         # Lightweight migration: add students.must_change_password if missing
         # (create_all() never ALTERs existing tables). Works on SQLite + MySQL.
@@ -110,31 +120,11 @@ try:
             if 'must_change_password' not in cols:
                 with db.engine.begin() as conn:
                     conn.execute(text('ALTER TABLE students ADD COLUMN must_change_password BOOLEAN DEFAULT 0'))
-                print('[DB] Added students.must_change_password column')
+                sys.stderr.write('[DB] Added students.must_change_password column\n')
+                sys.stderr.flush()
         except Exception as e:
-            print(f"[DB] must_change_password migration skipped: {e}")
-
-        # Auto-seed an admin account on startup if none exists. This makes a fresh
-        # deploy usable immediately (and re-creates the admin after each restart on
-        # hosts with an ephemeral filesystem). Password comes ONLY from the
-        # ADMIN_PASSWORD env var — never a hardcoded default.
-        try:
-            from models import Admin
-            from extensions import bcrypt as _bcrypt
-            if Admin.query.count() == 0:
-                admin_username = os.environ.get('ADMIN_USERNAME', 'admin').strip() or 'admin'
-                admin_password = os.environ.get('ADMIN_PASSWORD', '').strip()
-                if admin_password:
-                    db.session.add(Admin(
-                        username=admin_username,
-                        password_hash=_bcrypt.generate_password_hash(admin_password).decode('utf-8')
-                    ))
-                    db.session.commit()
-                    print(f"[DB] Seeded admin account '{admin_username}' from ADMIN_PASSWORD env var.")
-                else:
-                    print('[DB] No admin exists and ADMIN_PASSWORD not set — set it to auto-create an admin.')
-        except Exception as e:
-            print(f"[DB] admin seed skipped: {e}")
+            sys.stderr.write(f"[DB] must_change_password migration skipped: {e}\n")
+            sys.stderr.flush()
 
     # Root route — student chatbot (requires student login)
     @app.route('/', methods=['GET'])
@@ -171,6 +161,4 @@ if __name__ == '__main__':
     # debug is OFF unless FLASK_DEBUG is truthy in .env — the Werkzeug debugger
     # allows remote code execution, so it must never be on in production.
     debug_mode = os.environ.get('FLASK_DEBUG', '0').strip().lower() in ('1', 'true', 'yes', 'on')
-    # Hosts (Render, Railway, etc.) inject the port to bind via $PORT.
-    port = int(os.environ.get('PORT', '5000'))
-    app.run(debug=debug_mode, port=port, host='0.0.0.0')
+    app.run(debug=debug_mode, port=5000, host='0.0.0.0')

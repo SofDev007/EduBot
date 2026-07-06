@@ -20,12 +20,16 @@ admin_bp = Blueprint('admin', __name__)
 # every admin template (for the sidebar "Issues" badge).
 # ─────────────────────────────────────────
 @admin_bp.app_context_processor
-def inject_pending_issue_count():
+def inject_sidebar_globals():
     try:
         count = PasswordResetRequest.query.filter_by(status='pending').count()
     except Exception:
         count = 0
-    return {'pending_issue_count': count}
+    try:
+        subjects = Subject.query.order_by(Subject.name).all()
+    except Exception:
+        subjects = []
+    return {'pending_issue_count': count, 'sidebar_subjects': subjects}
 
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",

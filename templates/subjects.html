@@ -98,7 +98,7 @@
 {% if subjects %}
 <div class="subj-list">
   {% for s in subjects %}
-  <div class="subj-card">
+  <div class="subj-card" id="subject-{{ s.id }}">
     <div class="subj-top">
       <div class="subj-info">
         <h3>{{ s.name }}</h3>

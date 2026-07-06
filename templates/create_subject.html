@@ -12,8 +12,12 @@
 {% endblock %}
 
 {% block content %}
-<h2 style="font-family:'Inter', sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Create New Subject</h2>
-<p class="page-sub">Add a subject for students to take adaptive quizzes on.</p>
+<div class="page-hdr">
+  <div>
+    <h2>Create New Subject</h2>
+    <p>Add a subject for students to take adaptive quizzes on.</p>
+  </div>
+</div>
 
 <form method="POST" action="/admin/subject/create">
   <div class="field">

@@ -9,7 +9,8 @@
   flex-direction: column;
   z-index: 200;
   padding: 20px 0;
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, width 0.25s ease;
+  overflow: hidden;
 }
 
 .sb-brand {
@@ -78,6 +79,26 @@
   flex-shrink: 0;
 }
 
+/* ─── Nav group (subjects accordion) ────────────────────────────────────── */
+.nav-group { display: flex; flex-direction: column; gap: 0; }
+
+
+.nav-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.nav-sub-item {
+  padding-left: 30px !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+}
+
+/* Hide sub-items in collapsed sidebar */
+.sidebar.collapsed .nav-group-items { display: none; }
+
 .sb-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--border);
@@ -114,6 +135,71 @@
   transition: all 0.2s;
 }
 .theme-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ─── Collapse button ────────────────────────────────────────────────────── */
+.sb-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.sb-collapse-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ─── Collapsed state ────────────────────────────────────────────────────── */
+.sidebar.collapsed {
+  width: 64px;
+}
+.sidebar.collapsed .sb-title { display: none; }
+.sidebar.collapsed .sb-icon { display: none; }
+.sidebar.collapsed .sb-brand {
+  justify-content: center;
+  padding: 0 0 24px;
+  gap: 0;
+}
+.sidebar.collapsed .sb-collapse-btn { margin-left: 0; }
+.sidebar.collapsed .nav-label { display: none; }
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 10px;
+  gap: 0;
+}
+.sidebar.collapsed .nav-badge { display: none; }
+.sidebar.collapsed .logout-btn {
+  justify-content: center;
+  padding: 8px;
+  flex: none;
+}
+.sidebar.collapsed .sb-footer { justify-content: center; gap: 8px; padding: 16px 8px; }
+
+/* Tooltips on hover in collapsed mode */
+.sidebar.collapsed .nav-item:hover::after,
+.sidebar.collapsed .logout-btn:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 68px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 300;
+  pointer-events: none;
+}
+.sidebar.collapsed .nav-item,
+.sidebar.collapsed .logout-btn { position: relative; }
 
 /* ─── Hamburger (mobile) ─────────────────────────────────────────────────── */
 .hamburger {

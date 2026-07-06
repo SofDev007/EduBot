@@ -60,21 +60,32 @@ class Config:
     MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')
     MYSQL_DB = os.environ.get('MYSQL_DB', 'railway')
 
-    # Database Selection: Use SQLite for development, MySQL for production
-    # Set DB_TYPE=mysql in .env to use MySQL
-    DB_TYPE = os.environ.get('DB_TYPE', 'sqlite').lower()  # Default to SQLite for development
-    
-    # SQLAlchemy Database URI (Uniform Resource Identifier)
-    if DB_TYPE == 'mysql':
-        # MySQL configurationalso jarvis where are these apps showed in the apps section in my laptop
+    # Database Selection priority:
+    #   1. DATABASE_URL env var  → external PostgreSQL (Supabase / Neon / Render add-on)
+    #   2. DB_TYPE=mysql         → self-managed MySQL
+    #   3. default               → local SQLite (development only)
+    DB_TYPE = os.environ.get('DB_TYPE', 'sqlite').lower()
+    _DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+
+    if _DATABASE_URL:
+        # Some providers (Render, Heroku) still emit the legacy "postgres://" scheme;
+        # SQLAlchemy requires "postgresql://".
+        if _DATABASE_URL.startswith('postgresql://'):
+            SQLALCHEMY_DATABASE_URI = _DATABASE_URL.replace('postgresql://', 'postgresql+psycopg2://', 1)
+        else:
+            SQLALCHEMY_DATABASE_URI = _DATABASE_URL.replace('postgres://', 'postgresql+psycopg2://', 1)
+        print(f"[CONFIG] DB → PostgreSQL (DATABASE_URL set)")
+    elif DB_TYPE == 'mysql':
         ENCODED_PASSWORD = quote(MYSQL_PASSWORD, safe='')
         SQLALCHEMY_DATABASE_URI = (
             f"mysql+pymysql://{MYSQL_USER}:{ENCODED_PASSWORD}"
             f"@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
         )
+        print(f"[CONFIG] DB → MySQL ({MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB})")
     else:
-        # SQLite configuration (default for development)
+        # Local SQLite — persists on your machine, wiped on Render free tier
         SQLALCHEMY_DATABASE_URI = 'sqlite:///edubot.db'
+        print("[CONFIG] DB → SQLite (local file — data will be lost on Render restarts)")
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

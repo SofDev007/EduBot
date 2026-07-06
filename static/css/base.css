@@ -33,13 +33,17 @@
 }
 /* ─── Reset ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 body {
   font-family: 'Inter', sans-serif;
+  font-size: 1rem;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ─── Main content area ──────────────────────────────────────────────────── */
@@ -47,7 +51,9 @@ body {
   margin-left: var(--sidebar-width);
   padding: 28px;
   animation: pageIn 0.2s ease;
+  transition: margin-left 0.25s ease;
 }
+body.sidebar-collapsed .main { margin-left: 64px; }
 
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -138,6 +144,7 @@ body {
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .main { margin-left: 0; padding: 20px 16px; }
+  .page-hdr { padding-left: 52px; }
 }
 
 /* Headings: Playfair Display; body/UI: Inter */
