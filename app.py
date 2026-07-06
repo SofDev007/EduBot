@@ -126,6 +126,22 @@ def create_app():
             sys.stderr.write(f"[DB] must_change_password migration skipped: {e}\n")
             sys.stderr.flush()
 
+        # Seed admin account from env vars if none exists yet
+        try:
+            from models import Admin
+            if not Admin.query.first():
+                admin_username = os.environ.get('ADMIN_USERNAME', 'admin').strip()
+                admin_password = os.environ.get('ADMIN_PASSWORD', '').strip()
+                if admin_password:
+                    hashed = bcrypt.generate_password_hash(admin_password).decode('utf-8')
+                    db.session.add(Admin(username=admin_username, password_hash=hashed))
+                    db.session.commit()
+                    sys.stderr.write(f"[DB] Seeded admin account '{admin_username}' from ADMIN_PASSWORD env var.\n")
+                    sys.stderr.flush()
+        except Exception as e:
+            sys.stderr.write(f"[DB] Admin seed skipped: {e}\n")
+            sys.stderr.flush()
+
     # Root route — student chatbot (requires student login)
     @app.route('/', methods=['GET'])
     def serve_edubot():
