@@ -30,13 +30,13 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=False, index=True)
     topic = db.Column(db.String(500), nullable=False, index=True)
-    difficulty = db.Column(db.Enum('easy', 'hard'), nullable=False, index=True)
+    difficulty = db.Column(db.Enum('easy', 'hard', name='difficulty_enum'), nullable=False, index=True)
     question_text = db.Column(db.Text, nullable=False)
     option_a = db.Column(db.String(300), nullable=False)
     option_b = db.Column(db.String(300), nullable=False)
     option_c = db.Column(db.String(300), nullable=False)
     option_d = db.Column(db.String(300), nullable=False)
-    correct_option = db.Column(db.Enum('A','B','C','D'), nullable=False)
+    correct_option = db.Column(db.Enum('A','B','C','D', name='option_enum'), nullable=False)
     responses = db.relationship('Response', backref='question', lazy=True, cascade='all, delete-orphan')
     
     # Composite index for frequently queried combinations
@@ -70,7 +70,7 @@ class Session(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False, index=True)
     started_at = db.Column(db.DateTime, default=datetime.utcnow)
     completed_at = db.Column(db.DateTime, nullable=True)
-    status = db.Column(db.Enum('in_progress', 'completed'), default='in_progress', index=True)
+    status = db.Column(db.Enum('in_progress', 'completed', name='session_status_enum'), default='in_progress', index=True)
     selected_question_ids = db.Column(db.Text, nullable=True)
     responses = db.relationship('Response', backref='session', lazy=True, cascade='all, delete-orphan')
     weak_topics = db.relationship('WeakTopic', backref='session', lazy=True, cascade='all, delete-orphan')
@@ -86,7 +86,7 @@ class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False, index=True)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False, index=True)
-    selected_option = db.Column(db.Enum('A','B','C','D'), nullable=False)
+    selected_option = db.Column(db.Enum('A','B','C','D', name='option_enum'), nullable=False)
     is_correct = db.Column(db.Boolean, nullable=False, index=True)
     answered_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -109,6 +109,6 @@ class PasswordResetRequest(db.Model):
     name = db.Column(db.String(255), nullable=True)
     # pending  => admin still needs to action it
     # resolved => admin has reset the password / closed the issue
-    status = db.Column(db.Enum('pending', 'resolved'), nullable=False, default='pending', index=True)
+    status = db.Column(db.Enum('pending', 'resolved', name='reset_status_enum'), nullable=False, default='pending', index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved_at = db.Column(db.DateTime, nullable=True)
