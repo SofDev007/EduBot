@@ -30,7 +30,7 @@
 }
 .sb-brand h1 {
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 800;
   background: linear-gradient(90deg, var(--cyan), var(--violet));
   -webkit-background-clip: text;
@@ -55,7 +55,7 @@
   border-radius: 10px;
   color: var(--muted2);
   font-size: 16px;
-  text-decoration: none;
+  text-decoration: none;  
   transition: all 0.2s;
   border: 1px solid transparent;
 }
