@@ -97,19 +97,10 @@ def create_app():
 
     # Ensure any newly added tables exist (e.g. password_reset_requests).
     # create_all() only creates MISSING tables, so existing data is untouched.
-   import sys, traceback as _tb
-        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
-        db_kind = 'PostgreSQL' if db_uri.startswith('postgresql') else ('MySQL' if db_uri.startswith('mysql') else 'SQLite')
-        sys.stderr.write(f"[DB] Connecting to: {db_kind}\n")
-        sys.stderr.flush()
-        try:
-            db.create_all()
-            sys.stderr.write("[DB] create_all OK\n")
-            sys.stderr.flush()
+try:
+    db.create_all()
         except Exception as e:
-            sys.stderr.write(f"[DB] create_all FAILED: {e}\n")
-            _tb.print_exc(file=sys.stderr)
-            sys.stderr.flush()
+            import sys, traceback; sys.stderr.write(f"[DB] FAILED: {e}\n"); traceback.print_exc(file=sys.stderr); sys.stderr.flush()
 
         # Lightweight migration: add students.must_change_password if missing
         # (create_all() never ALTERs existing tables). Works on SQLite + MySQL.
