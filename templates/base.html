@@ -13,6 +13,40 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
 {% block styles %}{% endblock %}
 <script>(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')})()</script>
+<style>
+@keyframes sk-shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+.sk {
+  background: linear-gradient(90deg,
+    var(--surface, #1e1e1e) 25%,
+    var(--border,  #2d2d2d) 50%,
+    var(--surface, #1e1e1e) 75%);
+  background-size: 1600px 100%;
+  animation: sk-shimmer 1.6s infinite linear;
+  border-radius: 8px;
+}
+#page-skeleton {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  z-index: 9998;
+  background: var(--bg, #111);
+  padding: 32px 28px;
+  display: none;
+  overflow: hidden;
+}
+#page-skeleton.visible { display: block; }
+.sk-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+@media (max-width: 900px) {
+  .sk-cards { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
 </head>
 <body>
 
@@ -75,6 +109,25 @@
     </button>
   </div>
 </nav>
+
+<!-- Page-transition skeleton -->
+<div id="page-skeleton">
+  <div class="sk" style="height:26px;width:180px;margin-bottom:32px;"></div>
+  <div class="sk-cards">
+    <div class="sk" style="height:88px;border-radius:14px;"></div>
+    <div class="sk" style="height:88px;border-radius:14px;"></div>
+    <div class="sk" style="height:88px;border-radius:14px;"></div>
+    <div class="sk" style="height:88px;border-radius:14px;"></div>
+    <div class="sk" style="height:88px;border-radius:14px;"></div>
+  </div>
+  <div class="sk" style="height:12px;width:90px;margin-bottom:18px;border-radius:4px;"></div>
+  <div class="sk" style="height:46px;margin-bottom:8px;"></div>
+  <div class="sk" style="height:46px;margin-bottom:8px;opacity:.85;"></div>
+  <div class="sk" style="height:46px;margin-bottom:8px;opacity:.7;"></div>
+  <div class="sk" style="height:46px;margin-bottom:8px;opacity:.55;"></div>
+  <div class="sk" style="height:46px;margin-bottom:8px;opacity:.4;"></div>
+  <div class="sk" style="height:46px;opacity:.25;"></div>
+</div>
 
 <!-- Main content -->
 <main class="main" role="main">
@@ -163,9 +216,19 @@ function _nbDone() {
     setTimeout(() => { _nb.className = ''; _nb.style.width = '0'; _nb.style.opacity = ''; _nb.style.transition = ''; }, 320);
   }, 180);
 }
+function _showSkeleton() {
+  const sidebar = document.getElementById('sidebar');
+  const sk = document.getElementById('page-skeleton');
+  const isMobile = window.innerWidth <= 768;
+  sk.style.left = (!isMobile && sidebar ? sidebar.offsetWidth : 0) + 'px';
+  sk.classList.add('visible');
+}
 document.querySelectorAll('a.nav-item').forEach(a => {
   a.addEventListener('click', e => {
-    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && a.href && !a.href.includes('#')) _nbStart();
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && a.href && !a.href.includes('#')) {
+      _nbStart();
+      _showSkeleton();
+    }
   });
 });
 _nbStart();

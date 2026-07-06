@@ -86,6 +86,20 @@ class Config:
         # Local SQLite — persists on your machine, wiped on Render free tier
         SQLALCHEMY_DATABASE_URI = 'sqlite:///edubot.db'
         print("[CONFIG] DB → SQLite (local file — data will be lost on Render restarts)")
-    
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Connection-pool tuning so the app stays responsive when many students hit
+    # it at once, and survives idle-connection drops on hosted Postgres poolers
+    # (Supabase / Neon silently close idle connections, which otherwise surface
+    # as random 500s under load). SQLite doesn't use a real pool, so only apply
+    # these for Postgres/MySQL.
+    if not SQLALCHEMY_DATABASE_URI.startswith('sqlite'):
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_pre_ping': True,   # test a connection before use; replace if dead
+            'pool_recycle': 280,     # recycle connections before the pooler's ~300s idle timeout
+            'pool_size': 10,         # persistent connections held open
+            'max_overflow': 10,      # extra burst connections when all 10 are busy
+            'pool_timeout': 30,      # wait up to 30s for a free connection before erroring
+        }
 

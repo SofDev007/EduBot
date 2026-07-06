@@ -7,8 +7,10 @@ services:
     plan: free
     # Single worker on purpose: question generation uses an in-process background
     # thread + a global progress dict, which would not be shared across workers.
+    # Concurrency comes from threads instead — a quiz is I/O-bound (short DB
+    # reads/writes), so 16 threads let ~16 students be served at once on one worker.
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn "app:create_app()" --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    startCommand: gunicorn "app:create_app()" --workers 1 --threads 16 --worker-class gthread --worker-tmp-dir /dev/shm --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.10.12"
@@ -16,8 +18,14 @@ services:
         value: production
       - key: FLASK_DEBUG
         value: "0"
+      # DB_TYPE is ignored whenever DATABASE_URL is set (Postgres takes priority).
       - key: DB_TYPE
         value: sqlite
+      # External Postgres (Supabase). Set the full connection string in the
+      # Render dashboard — use the Session/Transaction pooler URL, not the
+      # direct connection (Render is IPv4-only). sync:false keeps it out of git.
+      - key: DATABASE_URL
+        sync: false
       - key: TZ_NAME
         value: Asia/Kolkata
       # Auto-generated strong session key (you don't need to set this yourself)
