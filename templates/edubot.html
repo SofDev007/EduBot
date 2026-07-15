@@ -200,7 +200,7 @@ body.state-incorrect .stripes-bg {
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:5px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);width:0%;}
 
 /* CARD DECK */
-#card-deck{position:relative;flex:1;display:flex;align-items:center;justify-content:center;perspective:1200px;overflow:hidden;}
+#card-deck{position:relative;flex:1;display:flex;align-items:center;justify-content:center;perspective:1200px;overflow-x:hidden;overflow-y:auto;}
 
 .card-slot{position:absolute;width:88%;max-width:520px;border-radius:14px;will-change:transform,opacity;transition:transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.35s ease;}
 .card-slot[data-pos="0"]{transform:translateZ(0) translateY(0) scale(1);z-index:10;}
@@ -631,6 +631,10 @@ const slots = [
 function getFront() { return slots.find(s => s.getAttribute('data-pos') === '0'); }
 function getMid()   { return slots.find(s => s.getAttribute('data-pos') === '1'); }
 
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function buildCardHTML(q, qNum) {
   // Fisher-Yates shuffle of display order
   const dbKeys = ['A','B','C','D'];
@@ -645,14 +649,14 @@ function buildCardHTML(q, qNum) {
   state.displayToDb = displayToDb;
   state.dbToDisplay = dbToDisplay;
   const opts = dbKeys.map((dk, i) =>
-    `<button class="opt" onclick="pickAnswer('${dk}',${qNum})"><span class="opt-k">${dk}</span><span>${q.options[shuffled[i]]}</span></button>`
+    `<button class="opt" onclick="pickAnswer('${dk}',${qNum})"><span class="opt-k">${dk}</span><span>${escapeHtml(q.options[shuffled[i]])}</span></button>`
   ).join('');
   return `<div class="q-card">
     <div class="q-badge">
-      <div class="q-topic">📌 ${q.topic}</div>
+      <div class="q-topic">📌 ${escapeHtml(q.topic)}</div>
       <div class="q-num-badge">Q${qNum}/${state.totalQ}</div>
     </div>
-    <div class="q-text">${q.text}</div>
+    <div class="q-text">${escapeHtml(q.text)}</div>
     <div class="opts" id="opts-${qNum}">${opts}</div>
   </div>`;
 }
@@ -739,7 +743,9 @@ async function loadSubjects() {
       card.className = 'sc';
       card.dataset.id = s.id;
       card.dataset.name = s.name;
-      card.innerHTML = `<div class="sc-head"><div class="sc-ic">📘</div><div class="sc-txt"><div class="sc-title">${s.name}</div><div class="sc-desc">${s.description || 'Tap to start an adaptive quiz on this subject.'}</div></div></div><div class="sc-stats"><span class="sc-qcount">▸ ${s.question_count || 0} questions</span><span class="sc-chip"><span class="dot"></span>Adaptive</span></div>`;
+      card.innerHTML = `<div class="sc-head"><div class="sc-ic">📘</div><div class="sc-txt"><div class="sc-title"></div><div class="sc-desc"></div></div></div><div class="sc-stats"><span class="sc-qcount">▸ ${s.question_count || 0} questions</span><span class="sc-chip"><span class="dot"></span>Adaptive</span></div>`;
+      card.querySelector('.sc-title').textContent = s.name;
+      card.querySelector('.sc-desc').textContent = s.description || 'Tap to start an adaptive quiz on this subject.';
       card.onclick = () => { playSound('click'); selectSubject(s.id, s.name, card); };
       grid.appendChild(card);
     });
