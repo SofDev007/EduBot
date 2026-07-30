@@ -40,7 +40,7 @@
 }
 .stat-card:hover .stat-arrow { opacity: 1; transform: translateX(0); }
 .stat-icon  { font-size: 20px; margin-bottom: 12px; }
-.stat-num   { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.stat-num   { font-family: 'Google Sans', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
 .stat-lbl   { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .stat-arrow { font-size: 11px; color: var(--muted); position: absolute; top: 16px; right: 14px; opacity: 0; transform: translateX(-4px); transition: all 0.2s; }
 .stat-card.c1 .stat-num { color: var(--cyan); }
@@ -52,7 +52,7 @@
 /* ── Quick actions ── */
 .actions { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
 .sec-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: var(--muted2);
@@ -83,7 +83,7 @@
 }
 .subj-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
 .subj-card:hover::before { opacity: 1; }
-.subj-card h3 { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.subj-card h3 { font-family: 'Google Sans', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
 .subj-card p  { font-size: 12px; color: var(--muted); min-height: 32px; line-height: 1.5; margin-bottom: 14px; }
 .subj-meta    { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .subj-acts    { display: flex; gap: 8px; }
@@ -100,7 +100,7 @@
   background: var(--surface2);
   color: var(--muted2);
   transition: all 0.2s;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
 }
 .subj-acts a:hover  { border-color: var(--cyan);  color: var(--cyan); }
 .subj-acts .del:hover { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.05); }
@@ -110,7 +110,7 @@
 .m-item  { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; }
 .m-item .mi-left h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .m-item .mi-left p  { font-size: 11px; color: var(--muted); }
-.m-item .mi-right   { font-size: 12px; color: var(--cyan); font-family: 'Inter', sans-serif; font-weight: 700; }
+.m-item .mi-right   { font-size: 12px; color: var(--cyan); font-family: 'Google Sans', sans-serif; font-weight: 700; }
 .m-spinner          { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
 
 /* ── Skeleton cards in modal ── */
@@ -130,7 +130,7 @@
 /* ── Analytics charts ── */
 .charts-row { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 28px; }
 .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-.chart-title { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.chart-title { font-family: 'Google Sans', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 .chart-wrap  { position: relative; }
 @media (max-width: 900px)  { .charts-row { grid-template-columns: 1fr; } }
 </style>
@@ -250,7 +250,7 @@
   const surface2 = cs.getPropertyValue('--surface2').trim();
   const border  = cs.getPropertyValue('--border').trim();
 
-  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.family = "'Google Sans', sans-serif";
   Chart.defaults.color = muted;
 
   const tip = {
