@@ -37,7 +37,7 @@ html { font-size: 16px; }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-size: 1rem;
   background: var(--bg);
   color: var(--text);
@@ -70,7 +70,7 @@ body.sidebar-collapsed .main { margin-left: 64px; }
   flex-wrap: wrap;
 }
 .page-hdr h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-size: 22px;
   font-weight: 800;
 }
@@ -147,5 +147,5 @@ body.sidebar-collapsed .main { margin-left: 64px; }
   .page-hdr { padding-left: 52px; }
 }
 
-/* Headings: Playfair Display; body/UI: Inter */
-h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Playfair Display',serif !important;}
+/* Headings: Switzer; body/UI: Google Sans */
+h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Switzer',sans-serif !important;}

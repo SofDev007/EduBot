@@ -11,7 +11,7 @@
   text-decoration: none;
   border: none;
   transition: all 0.2s;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
 }
 .btn-p {
   background: linear-gradient(135deg, var(--cyan), var(--violet));
@@ -45,7 +45,7 @@
   padding: 3px 10px;
   border-radius: 20px;
   font-weight: 600;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   background: rgba(255,107,53,0.1);
   color: var(--cyan);
   border: 1px solid rgba(255,107,53,0.2);
@@ -85,7 +85,7 @@
   to   { opacity: 1; transform: none; }
 }
 .modal h3 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-size: 18px;
   font-weight: 800;
   margin-bottom: 4px;
@@ -126,7 +126,7 @@
   border: 1px solid var(--border2);
   border-radius: 11px;
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-size: 15px;
   outline: none;
   transition: all 0.2s;
@@ -162,7 +162,7 @@ th {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   white-space: nowrap;
 }
 tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
