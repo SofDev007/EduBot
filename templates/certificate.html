@@ -7,12 +7,13 @@
 <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <style>
 :root{--orange:#ff6b35;--orange-light:#ff8c5a;--amber:#fbbf24;--white:#fff;--muted:#94a3b8;--muted2:#64748b;--border2:#444;--surface2:#222;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter', sans-serif;background:#070707;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;}
+body{font-family:'Google Sans', sans-serif;background:#070707;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;}
 .cert-card{width:720px;max-width:94vw;border-radius:18px;padding:2.5px;background:linear-gradient(135deg,var(--orange),var(--amber),var(--orange-light));box-shadow:0 24px 70px rgba(0,0,0,0.6),0 0 60px rgba(255,107,53,0.18);}
 .cert-frame{border-radius:16px;padding:42px 46px 34px;background:radial-gradient(120% 90% at 50% 0%,rgba(255,107,53,0.10),transparent 55%),#0c0c0d;}
 .cert-top{display:flex;align-items:center;justify-content:space-between;}
@@ -38,11 +39,11 @@ body{font-family:'Inter', sans-serif;background:#070707;min-height:100vh;display
 .cert-date{font-size:14px;font-weight:600;color:#fff;}
 .cert-meta .lbl2{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
 .cert-id{font-size:11px;color:var(--muted2);font-family:monospace;margin-top:8px;letter-spacing:0.5px;}
-.dlbtn{padding:13px 28px;border-radius:11px;border:none;background:var(--orange);color:#0a0a0a;font-family:'Inter', sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.dlbtn{padding:13px 28px;border-radius:11px;border:none;background:var(--orange);color:#0a0a0a;font-family:'Google Sans', sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
 .dlbtn:active{transform:translateY(1px);}
 .hint{color:var(--muted2);font-size:12px;text-align:center;max-width:420px;}
 @media(max-width:600px){.cert-name{font-size:30px;}.cert-frame{padding:30px 22px;}}
-h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Playfair Display',serif !important;}
+h1,h2,h3,h4,.brand-name,.cert-name,.cert-brand span,.cert-tier,.cert-kicker{font-family:'Switzer',sans-serif !important;}
 </style>
 </head>
 <body>
