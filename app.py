@@ -126,17 +126,21 @@ def create_app():
             sys.stderr.write(f"[DB] must_change_password migration skipped: {e}\n")
             sys.stderr.flush()
 
-        # Seed admin account from env vars if none exists yet
+        # Sync admin account with env vars on every startup (creates it if missing).
+        # Only touches the admin row — no other data is modified.
         try:
             from models import Admin
-            if not Admin.query.first():
-                admin_username = os.environ.get('ADMIN_USERNAME', 'admin').strip()
-                admin_password = os.environ.get('ADMIN_PASSWORD', '').strip()
-                if admin_password:
-                    hashed = bcrypt.generate_password_hash(admin_password).decode('utf-8')
-                    db.session.add(Admin(username=admin_username, password_hash=hashed))
+            admin_username = os.environ.get('ADMIN_USERNAME', 'admin').strip()
+            admin_password = os.environ.get('ADMIN_PASSWORD', '').strip()
+            if admin_password:
+                admin = Admin.query.first() or Admin(username=admin_username)
+                if admin.username != admin_username or not admin.password_hash \
+                        or not bcrypt.check_password_hash(admin.password_hash, admin_password):
+                    admin.username = admin_username
+                    admin.password_hash = bcrypt.generate_password_hash(admin_password).decode('utf-8')
+                    db.session.add(admin)
                     db.session.commit()
-                    sys.stderr.write(f"[DB] Seeded admin account '{admin_username}' from ADMIN_PASSWORD env var.\n")
+                    sys.stderr.write(f"[DB] Admin account synced to '{admin_username}' from env vars.\n")
                     sys.stderr.flush()
         except Exception as e:
             sys.stderr.write(f"[DB] Admin seed skipped: {e}\n")
